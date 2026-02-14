@@ -10,6 +10,7 @@ import os
 import re
 import uuid
 import copy
+from pathlib import Path
 from datetime import datetime
 from openai import OpenAI
 from chat_prompts import PHASE_PROMPTS, OPENING_MESSAGE
@@ -36,10 +37,36 @@ PHASE_ORDER = [
 ]
 
 # ---------------------------------------------------------------------------
-# Session store (in-memory; swap for Redis/DB in production)
+# Session store — file-backed for persistence across restarts
 # ---------------------------------------------------------------------------
 
+SESSION_DIR = Path("/tmp/framingbot_sessions")
+SESSION_DIR.mkdir(parents=True, exist_ok=True)
+
 sessions: dict[str, dict] = {}
+
+
+def _save_session(session: dict):
+    """Persist a session to disk."""
+    try:
+        path = SESSION_DIR / f"{session['id']}.json"
+        path.write_text(json.dumps(session, ensure_ascii=False, default=str))
+    except Exception:
+        pass  # best-effort persistence
+
+
+def _load_sessions():
+    """Load all sessions from disk on startup."""
+    for f in SESSION_DIR.glob("*.json"):
+        try:
+            data = json.loads(f.read_text())
+            sessions[data["id"]] = data
+        except Exception:
+            pass
+
+
+# Load existing sessions at import time
+_load_sessions()
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -103,6 +130,7 @@ def start_session(owner: str = "") -> dict:
     }
     session["framing"]["Owner"] = owner
     sessions[session_id] = session
+    _save_session(session)
 
     return {
         "session_id": session_id,
@@ -170,6 +198,9 @@ def process_message(session_id: str, user_message: str) -> dict:
     # Store assistant reply
     session["messages"].append({"role": "assistant", "content": agent_message})
 
+    # Persist session
+    _save_session(session)
+
     return {
         "agent_message": agent_message,
         "phase": session["phase"],
@@ -189,6 +220,7 @@ def update_framing(session_id: str, framing: dict) -> dict:
     if not session:
         raise ValueError(f"Session {session_id} not found.")
     session["framing"].update(framing)
+    _save_session(session)
     return session["framing"]
 
 

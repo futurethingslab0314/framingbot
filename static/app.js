@@ -71,9 +71,19 @@ async function api(endpoint, body = {}) {
     });
     if (!res.ok) {
         const err = await res.json().catch(() => ({ detail: res.statusText }));
-        throw new Error(err.detail || 'API Error');
+        const error = new Error(err.detail || 'API Error');
+        error.status = res.status;
+        throw error;
     }
     return res.json();
+}
+
+async function recreateSession() {
+    console.log('Session lost, recreating...');
+    const data = await api('/chat/start', { owner: '' });
+    state.sessionId = data.session_id;
+    updatePhase(data.phase);
+    return data.session_id;
 }
 
 // ---------------------------------------------------------------------------
@@ -189,17 +199,30 @@ async function sendMessage(text) {
     setLoading(true);
 
     try {
-        const data = await api('/chat/message', {
-            session_id: state.sessionId,
-            message: text,
-        });
+        let data;
+        try {
+            data = await api('/chat/message', {
+                session_id: state.sessionId,
+                message: text,
+            });
+        } catch (err) {
+            // Session lost (404) — recreate and retry
+            if (err.status === 404 || (err.message && err.message.includes('not found'))) {
+                await recreateSession();
+                data = await api('/chat/message', {
+                    session_id: state.sessionId,
+                    message: text,
+                });
+            } else {
+                throw err;
+            }
+        }
 
         addMessage('agent', data.agent_message);
         updatePhase(data.phase);
         updateFraming(data.framing);
 
         if (data.extraction_happened) {
-            // Small visual pulse on the structure panel
             const panel = document.querySelector('.structure-panel');
             panel.style.borderLeft = '2px solid rgba(139, 92, 246, 0.5)';
             setTimeout(() => { panel.style.borderLeft = 'none'; }, 1500);
@@ -324,13 +347,7 @@ $chatInput.addEventListener('input', () => {
     $chatInput.style.height = Math.min($chatInput.scrollHeight, 120) + 'px';
 });
 
-// Enter to send (Shift+Enter for new line)
-$chatInput.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter' && !e.shiftKey) {
-        e.preventDefault();
-        sendMessage($chatInput.value);
-    }
-});
+// Enter = new line (no auto-send), only the send button triggers send
 
 // Notion buttons
 $btnSaveNotion.addEventListener('click', saveToNotion);
