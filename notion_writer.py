@@ -5,7 +5,7 @@ Reads NOTION_API_KEY and NOTION_DATABASE_ID from environment variables.
 
 Notion field type mapping (adjust if your database uses different types):
   - Project Name  → title
-  - Owner         → rich_text
+  - Owner         → multi_select
   - Research Type → select
   - Background    → rich_text
   - Purpose       → rich_text
@@ -13,7 +13,7 @@ Notion field type mapping (adjust if your database uses different types):
   - Method        → rich_text
   - Result        → rich_text
   - Contribution  → rich_text
-  - Year          → select
+  - Year          → rich_text
 """
 
 import os
@@ -67,6 +67,14 @@ def _select(value: str) -> dict:
     }
 
 
+def _multi_select(value: str) -> dict:
+    """Helper: build a multi_select property value from a comma-separated string."""
+    names = [v.strip() for v in value.split(",") if v.strip()] if value else []
+    return {
+        "multi_select": [{"name": n} for n in names]
+    }
+
+
 def write_to_notion(framing_output: dict) -> dict:
     """
     Write a framing output dict to the Notion database.
@@ -84,7 +92,7 @@ def write_to_notion(framing_output: dict) -> dict:
 
     properties = {
         "Project Name": _title(framing_output.get("Project Name", "")),
-        "Owner":        _rich_text(framing_output.get("Owner", "")),
+        "Owner":        _multi_select(framing_output.get("Owner", "")),
         "Research Type": _select(framing_output.get("Research Type", "")),
         "Background":   _rich_text(framing_output.get("Background", "")),
         "Purpose":      _rich_text(framing_output.get("Purpose", "")),
@@ -92,7 +100,7 @@ def write_to_notion(framing_output: dict) -> dict:
         "Method":       _rich_text(framing_output.get("Method", "")),
         "Result":       _rich_text(framing_output.get("Result", "")),
         "Contribution": _rich_text(framing_output.get("Contribution", "")),
-        "Year":         _select(framing_output.get("Year", "")),
+        "Year":         _rich_text(framing_output.get("Year", "")),
     }
 
     page = notion.pages.create(

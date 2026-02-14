@@ -105,6 +105,21 @@ def _clean_response(text: str) -> str:
     return re.sub(r"\s*<extract>.*?</extract>\s*", "", text, flags=re.DOTALL).strip()
 
 
+def _detect_language(text: str) -> str:
+    """Detect if text is primarily Chinese or English."""
+    cjk_count = sum(1 for ch in text if '\u4e00' <= ch <= '\u9fff')
+    return "zh" if cjk_count > len(text) * 0.1 else "en"
+
+
+def _with_lang(skill_input: dict, session: dict) -> dict:
+    """Inject output language instruction into skill input."""
+    lang = session.get("language", "en")
+    lang_label = "繁體中文" if lang == "zh" else "English"
+    enriched = dict(skill_input)
+    enriched["_instruction"] = f"IMPORTANT: All output text MUST be written in {lang_label}."
+    return enriched
+
+
 # ---------------------------------------------------------------------------
 # Core engine
 # ---------------------------------------------------------------------------
@@ -153,6 +168,10 @@ def process_message(session_id: str, user_message: str) -> dict:
 
     # Accumulate raw input
     session["raw_input_parts"].append(user_message)
+
+    # Detect language from first substantive message
+    if "language" not in session:
+        session["language"] = _detect_language(user_message)
 
     # If still in greeting, advance to tension_discovery
     if session["phase"] == "greeting":
@@ -237,29 +256,29 @@ def _run_extraction(session: dict, signal: dict):
 
     if phase == "tension":
         # Run EpistemicModeClassifier
-        mode_result = run_skill("EpistemicModeClassifier", {
+        mode_result = run_skill("EpistemicModeClassifier", _with_lang({
             "raw_input": raw_input,
-        })
+        }, session))
         framing["Research Type"] = mode_result.get("mode", "")
 
         # Run TensionExtractor
-        tension = run_skill("TensionExtractor", {
+        tension = run_skill("TensionExtractor", _with_lang({
             "raw_input": raw_input,
-        })
+        }, session))
         framing["Background"] = (
-            f"Dominant assumption: {tension.get('dominant_assumption', '')} "
-            f"Blind spot: {tension.get('blind_spot', '')} "
-            f"Core gap: {tension.get('core_gap', '')}"
+            f"{tension.get('dominant_assumption', '')} "
+            f"{tension.get('blind_spot', '')} "
+            f"{tension.get('core_gap', '')}"
         )
         session["_tension"] = tension
 
     elif phase == "positioning":
         tension = session.get("_tension", {})
         mode = framing.get("Research Type", "")
-        position_result = run_skill("ResearchPositionBuilder", {
+        position_result = run_skill("ResearchPositionBuilder", _with_lang({
             "mode": mode,
             "tension": tension,
-        })
+        }, session))
         framing["Purpose"] = position_result.get("research_position", "")
 
     elif phase == "question":
@@ -267,10 +286,10 @@ def _run_extraction(session: dict, signal: dict):
         purpose = framing.get("Purpose", "")
 
         # Generate 3 RQs
-        rq_result = run_skill("ResearchQuestionGenerator", {
+        rq_result = run_skill("ResearchQuestionGenerator", _with_lang({
             "research_position": purpose,
             "mode": mode,
-        })
+        }, session))
         rq_list = rq_result.get("research_questions", [])
         session["rq_candidates"] = rq_list
 
@@ -287,26 +306,26 @@ def _run_extraction(session: dict, signal: dict):
         tension = session.get("_tension", {})
 
         # MethodInferrer
-        method_result = run_skill("MethodInferrer", {
+        method_result = run_skill("MethodInferrer", _with_lang({
             "mode": mode,
             "selected_rq": selected_rq,
-        })
+        }, session))
         framing["Method"] = method_result.get("method", "")
 
         # ResultInferrer
-        result_result = run_skill("ResultInferrer", {
+        result_result = run_skill("ResultInferrer", _with_lang({
             "mode": mode,
             "selected_rq": selected_rq,
             "method": framing["Method"],
-        })
+        }, session))
         framing["Result"] = result_result.get("result", "")
 
         # ContributionClaimer
-        contrib_result = run_skill("ContributionClaimer", {
+        contrib_result = run_skill("ContributionClaimer", _with_lang({
             "selected_rq": selected_rq,
             "mode": mode,
             "tension": tension,
-        })
+        }, session))
         framing["Contribution"] = contrib_result.get("contribution", "")
 
         # Set project name
