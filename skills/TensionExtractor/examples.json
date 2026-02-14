@@ -1,0 +1,26 @@
+[
+    {
+        "raw_input": "How can we reduce latency in real-time collaborative editing systems?",
+        "expected_output": {
+            "dominant_assumption": "Performance optimization in collaborative systems is primarily a technical infrastructure problem solvable through better algorithms and architecture.",
+            "blind_spot": "The role of human coordination patterns and social dynamics in shaping perceived latency and collaboration quality.",
+            "core_gap": "We lack a conceptual framework that integrates sociotechnical factors into the understanding of 'real-time' in collaborative editing."
+        }
+    },
+    {
+        "raw_input": "What are the lived experiences of first-generation college students navigating academic identity?",
+        "expected_output": {
+            "dominant_assumption": "Academic identity development follows a relatively uniform trajectory that can be supported through standard institutional interventions.",
+            "blind_spot": "The epistemic labour first-generation students perform in translating between home and academic knowledge systems.",
+            "core_gap": "There is insufficient understanding of how first-generation students construct academic identities at the intersection of cultural, class-based, and institutional discourses."
+        }
+    },
+    {
+        "raw_input": "I want to design a new framework for evaluating AI literacy in K-12 education.",
+        "expected_output": {
+            "dominant_assumption": "AI literacy can be adequately assessed using competency-based frameworks adapted from digital or computational literacy.",
+            "blind_spot": "The ethical and epistemic dimensions of AI literacy — understanding not just how AI works, but what it means for knowledge and agency.",
+            "core_gap": "No existing evaluation framework captures both the technical and critical-reflective dimensions of AI literacy in developmentally appropriate ways for K-12 learners."
+        }
+    }
+]

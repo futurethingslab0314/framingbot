@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FramingBot — Research Framing Agent</title>
+    <meta name="description" content="AI-powered research framing through guided exploration dialogue.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/index.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-brand">
+            <div class="header-logo">✦</div>
+            <h1>FramingBot</h1>
+            <span class="header-badge">Research Framing Agent</span>
+        </div>
+        <div class="header-phase" id="phaseIndicator">
+            <span class="phase-dot"></span>
+            <span class="phase-text">Ready</span>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-container">
+        <!-- Chat Panel -->
+        <section class="panel chat-panel">
+            <div class="panel-header">
+                <h2>💬 Exploration</h2>
+                <div class="panel-subtitle">透過對話探索你的研究想法</div>
+            </div>
+            <div class="chat-messages" id="chatMessages">
+                <!-- Messages will be inserted here -->
+            </div>
+            <div class="chat-input-area">
+                <div class="typing-indicator" id="typingIndicator">
+                    <span></span><span></span><span></span>
+                    Agent 思考中...
+                </div>
+                <form class="chat-form" id="chatForm">
+                    <textarea
+                        id="chatInput"
+                        placeholder="分享你的想法..."
+                        rows="1"
+                        autofocus
+                    ></textarea>
+                    <button type="submit" class="btn-send" id="sendBtn">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M22 2L11 13M22 2L15 22L11 13M22 2L2 9L11 13"/>
+                        </svg>
+                    </button>
+                </form>
+            </div>
+        </section>
+
+        <!-- Framing Structure Panel -->
+        <section class="panel structure-panel">
+            <div class="panel-header">
+                <h2>📐 Framing Structure</h2>
+                <div class="panel-subtitle">研究框架即時生成</div>
+            </div>
+            <div class="structure-fields" id="structureFields">
+                <div class="field-card" data-field="Research Type">
+                    <div class="field-label">
+                        <span class="field-icon">🔬</span>
+                        Research Type
+                    </div>
+                    <div class="field-value" id="field-ResearchType">
+                        <span class="field-empty">等待探索...</span>
+                    </div>
+                </div>
+                <div class="field-card" data-field="Background">
+                    <div class="field-label">
+                        <span class="field-icon">📖</span>
+                        Background
+                    </div>
+                    <div class="field-value" id="field-Background">
+                        <span class="field-empty">等待探索...</span>
+                    </div>
+                </div>
+                <div class="field-card" data-field="Purpose">
+                    <div class="field-label">
+                        <span class="field-icon">🎯</span>
+                        Purpose
+                    </div>
+                    <div class="field-value" id="field-Purpose">
+                        <span class="field-empty">等待探索...</span>
+                    </div>
+                </div>
+                <div class="field-card" data-field="RQ">
+                    <div class="field-label">
+                        <span class="field-icon">❓</span>
+                        Research Question
+                    </div>
+                    <div class="field-value" id="field-RQ">
+                        <span class="field-empty">等待探索...</span>
+                    </div>
+                </div>
+                <div class="field-card" data-field="Method">
+                    <div class="field-label">
+                        <span class="field-icon">🛠️</span>
+                        Method
+                    </div>
+                    <div class="field-value" id="field-Method">
+                        <span class="field-empty">等待探索...</span>
+                    </div>
+                </div>
+                <div class="field-card" data-field="Result">
+                    <div class="field-label">
+                        <span class="field-icon">📊</span>
+                        Result
+                    </div>
+                    <div class="field-value" id="field-Result">
+                        <span class="field-empty">等待探索...</span>
+                    </div>
+                </div>
+                <div class="field-card" data-field="Contribution">
+                    <div class="field-label">
+                        <span class="field-icon">💡</span>
+                        Contribution
+                    </div>
+                    <div class="field-value" id="field-Contribution">
+                        <span class="field-empty">等待探索...</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="action-buttons">
+                <button class="btn btn-primary" id="btnSaveNotion" disabled>
+                    <span class="btn-icon">📤</span>
+                    Save to Notion
+                </button>
+                <button class="btn btn-secondary" id="btnSyncNotion" disabled>
+                    <span class="btn-icon">🔄</span>
+                    Sync from Notion
+                </button>
+                <button class="btn btn-accent" id="btnLogicCheck" disabled>
+                    <span class="btn-icon">🧪</span>
+                    Run Logic Check
+                </button>
+            </div>
+
+            <!-- Logic Check Results -->
+            <div class="logic-check-results" id="logicCheckResults" style="display: none;">
+                <h3>🧪 Coherence Check</h3>
+                <div id="logicCheckContent"></div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Notion Sync Modal -->
+    <div class="modal-overlay" id="syncModal" style="display: none;">
+        <div class="modal">
+            <h3>🔄 Sync from Notion</h3>
+            <p>請輸入 Notion Page ID：</p>
+            <input type="text" id="notionPageIdInput" placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" class="modal-input">
+            <div class="modal-actions">
+                <button class="btn btn-secondary" id="syncCancel">取消</button>
+                <button class="btn btn-primary" id="syncConfirm">同步</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>

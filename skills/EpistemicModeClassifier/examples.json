@@ -1,0 +1,32 @@
+[
+    {
+        "raw_input": "How can we reduce latency in real-time collaborative editing systems?",
+        "expected_output": {
+            "mode": "Problem-solving"
+        }
+    },
+    {
+        "raw_input": "What are the lived experiences of first-generation college students navigating academic identity?",
+        "expected_output": {
+            "mode": "Exploratory"
+        }
+    },
+    {
+        "raw_input": "I want to design a new framework for evaluating AI literacy in K-12 education.",
+        "expected_output": {
+            "mode": "Constructive"
+        }
+    },
+    {
+        "raw_input": "The notion of 'digital natives' is fundamentally flawed and needs to be re-examined.",
+        "expected_output": {
+            "mode": "Critical"
+        }
+    },
+    {
+        "raw_input": "I want to explore how participatory design can be used to build better accessibility tools while challenging existing usability assumptions.",
+        "expected_output": {
+            "mode": "Hybrid"
+        }
+    }
+]

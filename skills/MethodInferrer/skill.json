@@ -1,0 +1,33 @@
+{
+    "skill_name": "MethodInferrer",
+    "description": "Infers the most appropriate methodological approach from the epistemic mode and selected research question.",
+    "input": {
+        "mode": {
+            "type": "string",
+            "enum": [
+                "Problem-solving",
+                "Exploratory",
+                "Constructive",
+                "Critical",
+                "Hybrid"
+            ],
+            "description": "The epistemic research mode."
+        },
+        "selected_rq": {
+            "type": "string",
+            "description": "The chosen research question."
+        }
+    },
+    "output": {
+        "method": {
+            "type": "string",
+            "description": "A 1–2 sentence description of the inferred methodological approach."
+        }
+    },
+    "prompt_file": "prompt.md",
+    "output_format": "json",
+    "model_requirements": {
+        "temperature": 0.3,
+        "max_tokens": 200
+    }
+}

@@ -1,0 +1,43 @@
+[
+    {
+        "description": "Well-aligned framing — no issues expected.",
+        "input": {
+            "mode": "Problem-solving",
+            "selected_rq": "How do group coordination patterns mediate the relationship between system latency and users' perceived quality of real-time collaboration?",
+            "tension": {
+                "dominant_assumption": "Performance optimization in collaborative systems is primarily a technical infrastructure problem solvable through better algorithms and architecture.",
+                "blind_spot": "The role of human coordination patterns and social dynamics in shaping perceived latency and collaboration quality.",
+                "core_gap": "We lack a conceptual framework that integrates sociotechnical factors into the understanding of 'real-time' in collaborative editing."
+            },
+            "contribution": "This study develops a sociotechnical model of perceived latency in collaborative editing, revealing how group coordination dynamics — not just network delay — shape users' real-time experience."
+        },
+        "expected_output": {
+            "logical_gaps": [],
+            "scope_issues": [],
+            "alignment_assessment": "The framing is well-aligned: the research question operationalises the tension, and the contribution directly answers it with a result type consistent with Problem-solving mode."
+        }
+    },
+    {
+        "description": "Misaligned framing — contribution overreaches beyond the RQ scope.",
+        "input": {
+            "mode": "Exploratory",
+            "selected_rq": "How do first-generation students make sense of the tensions between their cultural identities and institutional expectations of academic belonging?",
+            "tension": {
+                "dominant_assumption": "Academic identity development follows a relatively uniform trajectory that can be supported through standard institutional interventions.",
+                "blind_spot": "The epistemic labour first-generation students perform in translating between home and academic knowledge systems.",
+                "core_gap": "There is insufficient understanding of how first-generation students construct academic identities at the intersection of cultural, class-based, and institutional discourses."
+            },
+            "contribution": "This study provides a comprehensive theory of identity formation applicable to all underrepresented student populations across global higher education contexts."
+        },
+        "expected_output": {
+            "logical_gaps": [
+                "The contribution claims a general theory of identity formation, but the research question focuses specifically on sense-making of cultural-institutional tensions, which is interpretive rather than theory-building."
+            ],
+            "scope_issues": [
+                "The contribution extends to 'all underrepresented student populations' and 'global contexts', far exceeding the scope of first-generation students implied by the research question and tension.",
+                "The Exploratory mode suggests discovery-oriented outcomes, but the contribution claims a comprehensive theory, which implies a deductive ambition mismatched with exploratory intent."
+            ],
+            "alignment_assessment": "The framing is misaligned: the contribution significantly overreaches in both population scope and result ambition relative to the research question and exploratory mode."
+        }
+    }
+]

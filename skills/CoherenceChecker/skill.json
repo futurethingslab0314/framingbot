@@ -1,0 +1,71 @@
+{
+    "skill_name": "CoherenceChecker",
+    "description": "Checks logical alignment across the research framing pipeline: mode, tension, selected RQ, and contribution.",
+    "input": {
+        "mode": {
+            "type": "string",
+            "enum": [
+                "Problem-solving",
+                "Exploratory",
+                "Constructive",
+                "Critical",
+                "Hybrid"
+            ],
+            "description": "The epistemic research mode."
+        },
+        "selected_rq": {
+            "type": "string",
+            "description": "The chosen research question."
+        },
+        "tension": {
+            "type": "object",
+            "description": "The epistemic tension structure.",
+            "properties": {
+                "dominant_assumption": {
+                    "type": "string"
+                },
+                "blind_spot": {
+                    "type": "string"
+                },
+                "core_gap": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "dominant_assumption",
+                "blind_spot",
+                "core_gap"
+            ]
+        },
+        "contribution": {
+            "type": "string",
+            "description": "The claimed scholarly or practical contribution."
+        }
+    },
+    "output": {
+        "logical_gaps": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            },
+            "description": "Breaks in the inferential chain between framing components."
+        },
+        "scope_issues": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            },
+            "description": "Mismatches in scope or ambition between framing components."
+        },
+        "alignment_assessment": {
+            "type": "string",
+            "description": "A single summary sentence characterising the overall coherence."
+        }
+    },
+    "prompt_file": "prompt.md",
+    "output_format": "json",
+    "model_requirements": {
+        "temperature": 0.2,
+        "max_tokens": 400
+    }
+}

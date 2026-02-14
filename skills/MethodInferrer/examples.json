@@ -1,0 +1,29 @@
+[
+    {
+        "input": {
+            "mode": "Problem-solving",
+            "selected_rq": "How do group coordination patterns mediate the relationship between system latency and users' perceived quality of real-time collaboration?"
+        },
+        "expected_output": {
+            "method": "A quasi-experimental study comparing collaborative editing sessions under varying latency conditions, with think-aloud protocols and interaction logs to capture coordination patterns and perceived quality."
+        }
+    },
+    {
+        "input": {
+            "mode": "Exploratory",
+            "selected_rq": "How do first-generation students make sense of the tensions between their cultural identities and institutional expectations of academic belonging?"
+        },
+        "expected_output": {
+            "method": "A qualitative phenomenological study using semi-structured interviews with first-generation college students to explore their lived experiences of navigating cultural and institutional identity tensions."
+        }
+    },
+    {
+        "input": {
+            "mode": "Constructive",
+            "selected_rq": "What would a framework for evaluating K-12 AI literacy look like if it accounted for both technical competency and critical-reflective understanding?"
+        },
+        "expected_output": {
+            "method": "A design science research approach involving iterative framework development through expert consultation, literature synthesis, and pilot validation with K-12 educators."
+        }
+    }
+]

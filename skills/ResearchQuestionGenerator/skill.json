@@ -1,0 +1,55 @@
+{
+    "skill_name": "ResearchQuestionGenerator",
+    "description": "Generates 3 structurally different research questions (Mechanism, Interpretation, Design space) from a research position and mode.",
+    "input": {
+        "research_position": {
+            "type": "string",
+            "description": "The declarative research position from ResearchPositionBuilder."
+        },
+        "mode": {
+            "type": "string",
+            "enum": [
+                "Problem-solving",
+                "Exploratory",
+                "Constructive",
+                "Critical",
+                "Hybrid"
+            ],
+            "description": "The epistemic research mode from EpistemicModeClassifier."
+        }
+    },
+    "output": {
+        "research_questions": {
+            "type": "array",
+            "description": "Exactly 3 research questions, one per type.",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "type": {
+                        "type": "string",
+                        "enum": [
+                            "Mechanism",
+                            "Interpretation",
+                            "Design space"
+                        ]
+                    },
+                    "question": {
+                        "type": "string"
+                    }
+                },
+                "required": [
+                    "type",
+                    "question"
+                ]
+            },
+            "minItems": 3,
+            "maxItems": 3
+        }
+    },
+    "prompt_file": "prompt.md",
+    "output_format": "json",
+    "model_requirements": {
+        "temperature": 0.5,
+        "max_tokens": 400
+    }
+}

@@ -1,0 +1,136 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "ResearchFramingAgentState",
+    "description": "Shared state schema for a multi-skill Research Framing Agent.",
+    "type": "object",
+    "properties": {
+        "raw_input": {
+            "type": "string",
+            "description": "The original unprocessed input from the user."
+        },
+        "mode": {
+            "type": "string",
+            "enum": [
+                "Problem-solving",
+                "Exploratory",
+                "Constructive",
+                "Critical",
+                "Hybrid"
+            ],
+            "description": "The epistemic research mode classified by EpistemicModeClassifier."
+        },
+        "tension": {
+            "type": "object",
+            "description": "Identifies the core intellectual tension in the research topic.",
+            "properties": {
+                "dominant_assumption": {
+                    "type": "string",
+                    "description": "The prevailing assumption the research challenges or interrogates."
+                },
+                "blind_spot": {
+                    "type": "string",
+                    "description": "An overlooked perspective or gap in the existing discourse."
+                },
+                "core_gap": {
+                    "type": "string",
+                    "description": "The fundamental gap in knowledge the research aims to address."
+                }
+            },
+            "required": [
+                "dominant_assumption",
+                "blind_spot",
+                "core_gap"
+            ]
+        },
+        "research_position": {
+            "type": "string",
+            "description": "A concise statement of the researcher's stance or framing angle."
+        },
+        "research_questions": {
+            "type": "array",
+            "description": "Generated research questions categorized by type.",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "type": {
+                        "type": "string",
+                        "enum": [
+                            "Mechanism",
+                            "Interpretation",
+                            "Design space"
+                        ],
+                        "description": "The structural type of the research question."
+                    },
+                    "question": {
+                        "type": "string",
+                        "description": "The research question text."
+                    }
+                },
+                "required": [
+                    "type",
+                    "question"
+                ]
+            }
+        },
+        "selected_rq": {
+            "type": "string",
+            "description": "The final selected research question to pursue."
+        },
+        "result_type": {
+            "type": "string",
+            "enum": [
+                "framework",
+                "model",
+                "typology",
+                "critique",
+                "guideline",
+                "theory"
+            ],
+            "description": "The expected form of the research contribution or output."
+        },
+        "contribution": {
+            "type": "string",
+            "description": "A statement of the intended scholarly or practical contribution."
+        },
+        "coherence_notes": {
+            "type": "object",
+            "description": "Coherence assessment from CoherenceChecker across the research framing pipeline.",
+            "properties": {
+                "logical_gaps": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "description": "Breaks in the inferential chain between framing components."
+                },
+                "scope_issues": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "description": "Mismatches in scope or ambition between framing components."
+                },
+                "alignment_assessment": {
+                    "type": "string",
+                    "description": "A single summary sentence characterising the overall coherence."
+                }
+            },
+            "required": [
+                "logical_gaps",
+                "scope_issues",
+                "alignment_assessment"
+            ]
+        }
+    },
+    "required": [
+        "raw_input",
+        "mode",
+        "tension",
+        "research_position",
+        "research_questions",
+        "selected_rq",
+        "result_type",
+        "contribution",
+        "coherence_notes"
+    ]
+}

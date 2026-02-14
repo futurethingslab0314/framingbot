@@ -1,0 +1,30 @@
+{
+    "skill_name": "TensionExtractor",
+    "description": "Extracts the epistemic tension (dominant assumption, blind spot, core gap) from a raw research input.",
+    "input": {
+        "raw_input": {
+            "type": "string",
+            "description": "The original unprocessed research input from the user."
+        }
+    },
+    "output": {
+        "dominant_assumption": {
+            "type": "string",
+            "description": "The widely held belief the research pushes against."
+        },
+        "blind_spot": {
+            "type": "string",
+            "description": "A systematically overlooked perspective or dimension."
+        },
+        "core_gap": {
+            "type": "string",
+            "description": "The fundamental gap in understanding the research could address."
+        }
+    },
+    "prompt_file": "prompt.md",
+    "output_format": "json",
+    "model_requirements": {
+        "temperature": 0.3,
+        "max_tokens": 300
+    }
+}

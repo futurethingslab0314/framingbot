@@ -1,0 +1,29 @@
+{
+    "skill_name": "EpistemicModeClassifier",
+    "description": "Classifies the epistemic research mode of a raw research input into one of five categories.",
+    "input": {
+        "raw_input": {
+            "type": "string",
+            "description": "The original unprocessed research input from the user."
+        }
+    },
+    "output": {
+        "mode": {
+            "type": "string",
+            "enum": [
+                "Problem-solving",
+                "Exploratory",
+                "Constructive",
+                "Critical",
+                "Hybrid"
+            ],
+            "description": "The classified epistemic research mode."
+        }
+    },
+    "prompt_file": "prompt.md",
+    "output_format": "json",
+    "model_requirements": {
+        "temperature": 0,
+        "max_tokens": 50
+    }
+}

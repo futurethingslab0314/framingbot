@@ -1,0 +1,32 @@
+[
+    {
+        "input": {
+            "mode": "Problem-solving",
+            "selected_rq": "How do group coordination patterns mediate the relationship between system latency and users' perceived quality of real-time collaboration?",
+            "method": "A quasi-experimental study comparing collaborative editing sessions under varying latency conditions, with think-aloud protocols and interaction logs to capture coordination patterns and perceived quality."
+        },
+        "expected_output": {
+            "result": "Empirical findings identifying specific coordination patterns (e.g., turn-taking frequency, conflict resolution strategies) that significantly mediate the effect of system latency on perceived collaboration quality."
+        }
+    },
+    {
+        "input": {
+            "mode": "Exploratory",
+            "selected_rq": "How do first-generation students make sense of the tensions between their cultural identities and institutional expectations of academic belonging?",
+            "method": "A qualitative phenomenological study using semi-structured interviews with first-generation college students to explore their lived experiences of navigating cultural and institutional identity tensions."
+        },
+        "expected_output": {
+            "result": "A thematic analysis revealing distinct sense-making strategies that first-generation students employ when navigating tensions between cultural identities and institutional norms of academic belonging."
+        }
+    },
+    {
+        "input": {
+            "mode": "Constructive",
+            "selected_rq": "What would a framework for evaluating K-12 AI literacy look like if it accounted for both technical competency and critical-reflective understanding?",
+            "method": "A design science research approach involving iterative framework development through expert consultation, literature synthesis, and pilot validation with K-12 educators."
+        },
+        "expected_output": {
+            "result": "A multi-dimensional evaluation framework comprising assessment rubrics for both technical AI competencies and critical-reflective AI understanding, validated through expert review and pilot deployment."
+        }
+    }
+]

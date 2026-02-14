@@ -1,0 +1,46 @@
+[
+    {
+        "input": {
+            "research_position": "Current approaches to collaborative editing latency treat it as a purely technical problem, overlooking how human coordination dynamics shape perceived real-time performance and leaving sociotechnical factors unintegrated.",
+            "mode": "Problem-solving"
+        },
+        "expected_output": {
+            "research_questions": [
+                {
+                    "type": "Mechanism",
+                    "question": "How do group coordination patterns mediate the relationship between system latency and users' perceived quality of real-time collaboration?"
+                },
+                {
+                    "type": "Interpretation",
+                    "question": "How do users in collaborative editing environments interpret and adapt to latency as a social rather than purely technical disruption?"
+                },
+                {
+                    "type": "Design space",
+                    "question": "What design principles for collaborative editing systems would account for both network latency and human coordination overhead?"
+                }
+            ]
+        }
+    },
+    {
+        "input": {
+            "research_position": "Little is understood about how first-generation college students negotiate academic identity across cultural and class-based knowledge systems, particularly the epistemic labour of translation that institutional support models fail to recognise.",
+            "mode": "Exploratory"
+        },
+        "expected_output": {
+            "research_questions": [
+                {
+                    "type": "Mechanism",
+                    "question": "Through what processes do first-generation students translate between home and academic knowledge systems during identity negotiation?"
+                },
+                {
+                    "type": "Interpretation",
+                    "question": "How do first-generation students make sense of the tensions between their cultural identities and institutional expectations of academic belonging?"
+                },
+                {
+                    "type": "Design space",
+                    "question": "What forms of institutional support might be designed to recognise and reduce the epistemic labour that first-generation students perform?"
+                }
+            ]
+        }
+    }
+]

@@ -1,0 +1,67 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "NotionResearchFramingOutput",
+    "description": "Structured output mapped to the Notion research project database schema.",
+    "type": "object",
+    "properties": {
+        "Project Name": {
+            "type": "string",
+            "description": "A concise, descriptive title for the research project."
+        },
+        "Owner": {
+            "type": "string",
+            "description": "The owner or author of the research project."
+        },
+        "Research Type": {
+            "type": "string",
+            "enum": [
+                "Problem-solving",
+                "Exploratory",
+                "Constructive",
+                "Critical",
+                "Hybrid"
+            ],
+            "description": "The epistemic research mode classified by EpistemicModeClassifier."
+        },
+        "Background": {
+            "type": "string",
+            "description": "Research background derived from epistemic tension: dominant assumption, blind spot, and core gap."
+        },
+        "Purpose": {
+            "type": "string",
+            "description": "Research positioning statement reflecting the epistemic stance."
+        },
+        "RQ": {
+            "type": "string",
+            "description": "The selected research question."
+        },
+        "Method": {
+            "type": "string",
+            "description": "Inferred methodological approach aligned with the research type and question."
+        },
+        "Result": {
+            "type": "string",
+            "description": "Expected result type and form of the research output."
+        },
+        "Contribution": {
+            "type": "string",
+            "description": "A concise statement of the intended scholarly or practical contribution."
+        },
+        "Year": {
+            "type": "string",
+            "description": "The year of the research project."
+        }
+    },
+    "required": [
+        "Project Name",
+        "Owner",
+        "Research Type",
+        "Background",
+        "Purpose",
+        "RQ",
+        "Method",
+        "Result",
+        "Contribution",
+        "Year"
+    ]
+}

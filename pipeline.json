@@ -1,0 +1,87 @@
+{
+    "pipeline_name": "FramingAgent",
+    "description": "End-to-end research framing pipeline. Classifies epistemic mode, extracts tension, builds research position, generates research questions, claims contribution, and checks coherence.",
+    "shared_state_schema": "shared_state_schema.json",
+    "steps": [
+        {
+            "step": 1,
+            "skill": "EpistemicModeClassifier",
+            "input_mapping": {
+                "raw_input": "state.raw_input"
+            },
+            "output_mapping": {
+                "state.mode": "output.mode"
+            }
+        },
+        {
+            "step": 2,
+            "skill": "TensionExtractor",
+            "input_mapping": {
+                "raw_input": "state.raw_input"
+            },
+            "output_mapping": {
+                "state.tension.dominant_assumption": "output.dominant_assumption",
+                "state.tension.blind_spot": "output.blind_spot",
+                "state.tension.core_gap": "output.core_gap"
+            }
+        },
+        {
+            "step": 3,
+            "skill": "ResearchPositionBuilder",
+            "input_mapping": {
+                "mode": "state.mode",
+                "tension": "state.tension"
+            },
+            "output_mapping": {
+                "state.research_position": "output.research_position"
+            }
+        },
+        {
+            "step": 4,
+            "skill": "ResearchQuestionGenerator",
+            "input_mapping": {
+                "research_position": "state.research_position",
+                "mode": "state.mode"
+            },
+            "output_mapping": {
+                "state.research_questions": "output.research_questions"
+            }
+        },
+        {
+            "step": 5,
+            "skill": null,
+            "action": "auto_select",
+            "description": "Auto-select the first research question as selected_rq.",
+            "logic": "state.selected_rq = state.research_questions[0].question"
+        },
+        {
+            "step": 6,
+            "skill": "ContributionClaimer",
+            "input_mapping": {
+                "selected_rq": "state.selected_rq",
+                "mode": "state.mode",
+                "tension": "state.tension"
+            },
+            "output_mapping": {
+                "state.result_type": "output.result_type",
+                "state.contribution": "output.contribution"
+            }
+        },
+        {
+            "step": 7,
+            "skill": "CoherenceChecker",
+            "input_mapping": {
+                "mode": "state.mode",
+                "selected_rq": "state.selected_rq",
+                "tension": "state.tension",
+                "contribution": "state.contribution"
+            },
+            "output_mapping": {
+                "state.coherence_notes.logical_gaps": "output.logical_gaps",
+                "state.coherence_notes.scope_issues": "output.scope_issues",
+                "state.coherence_notes.alignment_assessment": "output.alignment_assessment"
+            }
+        }
+    ],
+    "final_output": "state"
+}

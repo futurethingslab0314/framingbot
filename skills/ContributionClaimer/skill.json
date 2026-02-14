@@ -1,0 +1,65 @@
+{
+    "skill_name": "ContributionClaimer",
+    "description": "Generates a result type and contribution statement from a selected research question, mode, and tension.",
+    "input": {
+        "selected_rq": {
+            "type": "string",
+            "description": "The chosen research question to pursue."
+        },
+        "mode": {
+            "type": "string",
+            "enum": [
+                "Problem-solving",
+                "Exploratory",
+                "Constructive",
+                "Critical",
+                "Hybrid"
+            ],
+            "description": "The epistemic research mode from EpistemicModeClassifier."
+        },
+        "tension": {
+            "type": "object",
+            "description": "The epistemic tension structure from TensionExtractor.",
+            "properties": {
+                "dominant_assumption": {
+                    "type": "string"
+                },
+                "blind_spot": {
+                    "type": "string"
+                },
+                "core_gap": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "dominant_assumption",
+                "blind_spot",
+                "core_gap"
+            ]
+        }
+    },
+    "output": {
+        "result_type": {
+            "type": "string",
+            "enum": [
+                "framework",
+                "model",
+                "typology",
+                "critique",
+                "guideline",
+                "theory"
+            ],
+            "description": "The expected form of the research contribution or output."
+        },
+        "contribution": {
+            "type": "string",
+            "description": "A concise statement of the intended scholarly or practical contribution."
+        }
+    },
+    "prompt_file": "prompt.md",
+    "output_format": "json",
+    "model_requirements": {
+        "temperature": 0.4,
+        "max_tokens": 250
+    }
+}

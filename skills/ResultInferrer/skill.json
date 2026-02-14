@@ -1,0 +1,37 @@
+{
+    "skill_name": "ResultInferrer",
+    "description": "Infers the expected research result from mode, selected research question, and method.",
+    "input": {
+        "mode": {
+            "type": "string",
+            "enum": [
+                "Problem-solving",
+                "Exploratory",
+                "Constructive",
+                "Critical",
+                "Hybrid"
+            ],
+            "description": "The epistemic research mode."
+        },
+        "selected_rq": {
+            "type": "string",
+            "description": "The chosen research question."
+        },
+        "method": {
+            "type": "string",
+            "description": "The inferred methodological approach."
+        }
+    },
+    "output": {
+        "result": {
+            "type": "string",
+            "description": "A 1–2 sentence description of the expected research output."
+        }
+    },
+    "prompt_file": "prompt.md",
+    "output_format": "json",
+    "model_requirements": {
+        "temperature": 0.3,
+        "max_tokens": 200
+    }
+}
