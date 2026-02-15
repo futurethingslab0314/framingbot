@@ -34,6 +34,7 @@ from conversation_engine import (
     get_session,
     update_framing,
     run_logic_check,
+    generate_abstract,
 )
 
 # ---------------------------------------------------------------------------
@@ -194,6 +195,18 @@ def chat_logic_check(request: LogicCheckRequest):
     """Run coherence check on the current framing structure."""
     try:
         result = run_logic_check(request.session_id)
+        return result
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/chat/generate-abstract")
+def chat_generate_abstract(request: LogicCheckRequest):
+    """Generate a bilingual academic abstract from the current framing."""
+    try:
+        result = generate_abstract(request.session_id)
         return result
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))

@@ -38,8 +38,13 @@ const $syncConfirm = document.getElementById('syncConfirm');
 const $logicCheckResults = document.getElementById('logicCheckResults');
 const $logicCheckContent = document.getElementById('logicCheckContent');
 
+const $btnGenerateAbstract = document.getElementById('btnGenerateAbstract');
+const $abstractResults = document.getElementById('abstractResults');
+const $abstractContent = document.getElementById('abstractContent');
+
 // Field ID map
 const FIELD_MAP = {
+    'Owner': 'field-Owner',
     'Research Type': 'field-ResearchType',
     'Background': 'field-Background',
     'Purpose': 'field-Purpose',
@@ -166,6 +171,7 @@ function updateFraming(framing) {
     $btnSaveNotion.disabled = !hasContent;
     $btnSyncNotion.disabled = !state.sessionId;
     $btnLogicCheck.disabled = !framing['RQ'];
+    $btnGenerateAbstract.disabled = !framing['RQ'];
 }
 
 // ---------------------------------------------------------------------------
@@ -332,6 +338,48 @@ async function runLogicCheck() {
     }
 }
 
+async function generateAbstract() {
+    if (!state.sessionId) return;
+    $btnGenerateAbstract.disabled = true;
+    $btnGenerateAbstract.querySelector('.btn-icon').textContent = '⏳';
+
+    try {
+        const data = await api('/chat/generate-abstract', {
+            session_id: state.sessionId,
+        });
+
+        let html = '';
+
+        if (data.abstract_en) {
+            html += '<div class="logic-section">';
+            html += '<div class="logic-section-title">🇺🇸 English Abstract</div>';
+            html += `<div class="logic-assessment">${data.abstract_en}</div>`;
+            html += '</div>';
+        }
+
+        if (data.abstract_zh) {
+            html += '<div class="logic-section">';
+            html += '<div class="logic-section-title">🇹🇼 中文摘要</div>';
+            html += `<div class="logic-assessment">${data.abstract_zh}</div>`;
+            html += '</div>';
+        }
+
+        if (!html) {
+            html = '<div class="logic-item">⚠️ 無法生成摘要，請確認 framing 欄位已填寫。</div>';
+        }
+
+        $abstractContent.innerHTML = html;
+        $abstractResults.style.display = 'block';
+
+        addMessage('agent', '📝 學術摘要已生成！請查看右側面板。');
+    } catch (err) {
+        addMessage('agent', `⚠️ 摘要生成失敗：${err.message}`);
+    } finally {
+        $btnGenerateAbstract.disabled = false;
+        $btnGenerateAbstract.querySelector('.btn-icon').textContent = '📝';
+    }
+}
+
 // ---------------------------------------------------------------------------
 // Event listeners
 // ---------------------------------------------------------------------------
@@ -356,6 +404,7 @@ $btnSyncNotion.addEventListener('click', () => {
     $notionPageIdInput.focus();
 });
 $btnLogicCheck.addEventListener('click', runLogicCheck);
+$btnGenerateAbstract.addEventListener('click', generateAbstract);
 
 // Modal
 $syncCancel.addEventListener('click', () => {

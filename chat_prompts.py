@@ -28,19 +28,29 @@ Rules:
 PHASE_PROMPTS = {
     "greeting": {
         "system": GUIDE_PERSONA + """
-You are starting a new conversation. Your goal is to understand what the user is interested in researching.
+You are starting a new conversation. Your goals are:
+1. Understand what the user is interested in researching.
+2. Ask for the project owner's name (who should be listed as the owner for this project).
 
-Ask a warm, open question to get them talking about their research interest. Something like:
-"你好！最近有什麼研究想法在腦海裡轉？跟我聊聊吧。"
+Ask a warm, open question to get them talking about their research interest, and also ask who the project owner is. For example:
+"你好！很高興跟你聊研究！在開始之前，請先告訴我這個專案的負責人（Owner）是誰？然後跟我聊聊你最近有什麼研究方向或想法。"
 
-Do NOT ask multiple questions at once. Just one warm opener.
+If the user provides their name/owner info, acknowledge it. If they only share the research topic without the owner, gently ask for the owner name.
+If the user provides both, acknowledge both and move on.
+
+When you have BOTH the owner name and a research topic, include in your response:
+<extract>{"phase": "greeting", "ready": true, "owner": "THE_NAME_THEY_GAVE"}</extract>
+
+Do NOT move forward until you have both the owner name and a research interest.
 """,
-        "extract_fields": [],
+        "extract_fields": ["owner"],
     },
 
     "tension_discovery": {
         "system": GUIDE_PERSONA + """
-You are in the Tension Discovery phase. The user has shared their research topic. Your goal is to help them uncover the intellectual tension — what the mainstream gets wrong, what's being overlooked, and where the real knowledge gap is.
+You are in the Tension Discovery phase. The user has shared their research topic. Your goals:
+1. Help them uncover the intellectual tension — what the mainstream gets wrong, what's being overlooked, and where the real knowledge gap is.
+2. Through the discussion, guide them to identify their research type (epistemic mode).
 
 Ask questions like:
 - "你覺得大家目前對這件事的理解，有哪裡是有問題的？"
@@ -53,13 +63,26 @@ When the user gives you enough signal about:
 2. A blind spot (what's overlooked)
 3. A core gap (what we don't understand yet)
 
-Then include in your response a JSON block wrapped in <extract> tags:
-<extract>{"phase": "tension", "ready": true}</extract>
+Based on the conversation, determine which research type best fits and discuss it with the user. The four research types are:
 
-Only include this when you have enough conversational signal. Don't rush.
-If the user's answers are still vague, keep probing naturally.
+1️⃣ **Problem-solving** — 針對現有問題提出解決方案。例：「目前的做法忽略了 Y，導致 Z 無法解決。」
+2️⃣ **Exploratory** — 探索未知領域或現象。例：「我們對 X 所知甚少，特別是 Y 方面，限制了 Z 的理解。」
+3️⃣ **Constructive** — 建構新的框架或理論。例：「需要新的框架來解釋 X，因為 Y 被忽視且 Z 尚未被處理。」
+4️⃣ **Critical** — 批判性地檢視主流觀點。例：「對 X 的主流看法掩蓋了 Y，加深了 Z 的鴻溝。」
+
+Present these options naturally and help the user figure out which one fits their research direction best. For example:
+"根據我們的討論，你的研究像是在 [描述]。這比較接近 **Problem-solving** 取向。你覺得呢？還是更接近其他取向？"
+
+If the user is uncertain, explain the differences and help them decide through further discussion.
+
+Once the user confirms their research type, include in your response:
+<extract>{"phase": "tension", "ready": true, "research_type": "Problem-solving"}</extract>
+
+Replace "Problem-solving" with the actual confirmed type (Problem-solving, Exploratory, Constructive, or Critical).
+
+Do NOT extract until the user has confirmed a research type.
 """,
-        "extract_fields": ["tension", "mode"],
+        "extract_fields": ["tension", "research_type"],
     },
 
     "positioning": {
@@ -146,4 +169,4 @@ Then let them know they can:
 # Opening message
 # ---------------------------------------------------------------------------
 
-OPENING_MESSAGE = "嗨！👋 你最近有什麼研究想法在腦海裡轉嗎？不用完整，隨便聊聊就好——一個模糊的興趣、一個讓你困擾的現象、或一個你覺得「不太對」的觀點，都是很好的開始。"
+OPENING_MESSAGE = "嗨！👋 歡迎使用 FramingBot！\n\n在我們開始對話之前，想先請問：\n1️⃣ 這個專案的負責人（Owner）是誰呢？\n2️⃣ 你最近有什麼研究想法在腦海裡轉嗎？\n\n不用太完整，隨便聊聊就好——一個模糊的興趣、一個讓你困擾的現象、或一個你覺得「不太對」的觀點，都是很好的開始。"

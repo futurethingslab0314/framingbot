@@ -5,7 +5,7 @@ Reads NOTION_API_KEY and NOTION_DATABASE_ID from environment variables.
 
 Notion field type mapping (adjust if your database uses different types):
   - Project Name  → title
-  - Owner         → multi_select
+  - Owner         → rich_text
   - Research Type → select
   - Background    → rich_text
   - Purpose       → rich_text
@@ -92,7 +92,7 @@ def write_to_notion(framing_output: dict) -> dict:
 
     properties = {
         "Project Name": _title(framing_output.get("Project Name", "")),
-        "Owner":        _multi_select(framing_output.get("Owner", "")),
+        "Owner":        _rich_text(framing_output.get("Owner", "")),
         "Research Type": _select(framing_output.get("Research Type", "")),
         "Background":   _rich_text(framing_output.get("Background", "")),
         "Purpose":      _rich_text(framing_output.get("Purpose", "")),

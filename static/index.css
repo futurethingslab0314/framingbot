@@ -94,8 +94,15 @@ body {
 }
 
 @keyframes pulse-glow {
-    0%, 100% { text-shadow: 0 0 8px var(--accent-purple-glow); }
-    50% { text-shadow: 0 0 20px var(--accent-purple-glow), 0 0 40px rgba(139, 92, 246, 0.08); }
+
+    0%,
+    100% {
+        text-shadow: 0 0 8px var(--accent-purple-glow);
+    }
+
+    50% {
+        text-shadow: 0 0 20px var(--accent-purple-glow), 0 0 40px rgba(139, 92, 246, 0.08);
+    }
 }
 
 .header h1 {
@@ -131,8 +138,17 @@ body {
 }
 
 @keyframes dot-pulse {
-    0%, 100% { opacity: 0.6; transform: scale(1); }
-    50% { opacity: 1; transform: scale(1.2); }
+
+    0%,
+    100% {
+        opacity: 0.6;
+        transform: scale(1);
+    }
+
+    50% {
+        opacity: 1;
+        transform: scale(1.2);
+    }
 }
 
 /* --------------- Main Layout --------------- */
@@ -187,9 +203,11 @@ body {
 .chat-messages::-webkit-scrollbar {
     width: 4px;
 }
+
 .chat-messages::-webkit-scrollbar-track {
     background: transparent;
 }
+
 .chat-messages::-webkit-scrollbar-thumb {
     background: rgba(255, 255, 255, 0.1);
     border-radius: 4px;
@@ -207,8 +225,15 @@ body {
 }
 
 @keyframes bubble-in {
-    from { opacity: 0; transform: translateY(8px); }
-    to { opacity: 1; transform: translateY(0); }
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .chat-bubble.agent {
@@ -234,8 +259,13 @@ body {
     display: block;
 }
 
-.chat-bubble.agent .bubble-label { color: var(--accent-blue); }
-.chat-bubble.user .bubble-label { color: var(--accent-purple); }
+.chat-bubble.agent .bubble-label {
+    color: var(--accent-blue);
+}
+
+.chat-bubble.user .bubble-label {
+    color: var(--accent-purple);
+}
 
 /* Chat Input */
 .chat-input-area {
@@ -266,12 +296,28 @@ body {
     border-radius: 50%;
     animation: typing-dot 1.4s infinite;
 }
-.typing-indicator span:nth-child(2) { animation-delay: 0.2s; }
-.typing-indicator span:nth-child(3) { animation-delay: 0.4s; }
+
+.typing-indicator span:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.typing-indicator span:nth-child(3) {
+    animation-delay: 0.4s;
+}
 
 @keyframes typing-dot {
-    0%, 60%, 100% { opacity: 0.3; transform: scale(0.8); }
-    30% { opacity: 1; transform: scale(1); }
+
+    0%,
+    60%,
+    100% {
+        opacity: 0.3;
+        transform: scale(0.8);
+    }
+
+    30% {
+        opacity: 1;
+        transform: scale(1);
+    }
 }
 
 .chat-form {
@@ -339,13 +385,16 @@ body {
 /* --------------- Structure Panel --------------- */
 .structure-panel {
     background: var(--bg-secondary);
-    overflow-y: auto;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
 }
 
-.structure-panel::-webkit-scrollbar {
+.structure-fields::-webkit-scrollbar {
     width: 4px;
 }
-.structure-panel::-webkit-scrollbar-thumb {
+
+.structure-fields::-webkit-scrollbar-thumb {
     background: rgba(255, 255, 255, 0.08);
     border-radius: 4px;
 }
@@ -356,6 +405,7 @@ body {
     flex-direction: column;
     gap: 10px;
     flex: 1;
+    overflow-y: auto;
 }
 
 /* Field Cards */
@@ -381,8 +431,15 @@ body {
 }
 
 @keyframes field-glow {
-    0% { border-color: var(--accent-purple); box-shadow: 0 0 20px var(--accent-purple-glow); }
-    100% { border-color: rgba(139, 92, 246, 0.2); box-shadow: none; }
+    0% {
+        border-color: var(--accent-purple);
+        box-shadow: 0 0 20px var(--accent-purple-glow);
+    }
+
+    100% {
+        border-color: rgba(139, 92, 246, 0.2);
+        box-shadow: none;
+    }
 }
 
 .field-label {
@@ -463,6 +520,7 @@ body {
     border-color: rgba(139, 92, 246, 0.25);
     color: var(--accent-purple);
 }
+
 .btn-primary:hover:not(:disabled) {
     background: rgba(139, 92, 246, 0.2);
 }
@@ -472,6 +530,7 @@ body {
     border-color: rgba(96, 165, 250, 0.2);
     color: var(--accent-blue);
 }
+
 .btn-secondary:hover:not(:disabled) {
     background: rgba(96, 165, 250, 0.15);
 }
@@ -481,6 +540,7 @@ body {
     border-color: rgba(52, 211, 153, 0.2);
     color: var(--accent-green);
 }
+
 .btn-accent:hover:not(:disabled) {
     background: rgba(52, 211, 153, 0.15);
 }
@@ -552,8 +612,13 @@ body {
 }
 
 @keyframes fade-in {
-    from { opacity: 0; }
-    to { opacity: 1; }
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
 }
 
 .modal {
@@ -567,8 +632,15 @@ body {
 }
 
 @keyframes modal-in {
-    from { opacity: 0; transform: scale(0.95) translateY(10px); }
-    to { opacity: 1; transform: scale(1) translateY(0); }
+    from {
+        opacity: 0;
+        transform: scale(0.95) translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: scale(1) translateY(0);
+    }
 }
 
 .modal h3 {
@@ -612,11 +684,13 @@ body {
         grid-template-columns: 1fr;
         height: auto;
     }
+
     .chat-panel {
         border-right: none;
         border-bottom: 1px solid var(--border-glass);
         height: 55vh;
     }
+
     .structure-panel {
         height: 45vh;
     }

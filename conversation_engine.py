@@ -173,10 +173,8 @@ def process_message(session_id: str, user_message: str) -> dict:
     if "language" not in session:
         session["language"] = _detect_language(user_message)
 
-    # If still in greeting, advance to tension_discovery
-    if session["phase"] == "greeting":
-        session["phase"] = "tension_discovery"
-        session["phase_index"] = 1
+
+    # Stay in greeting until LLM signals (no auto-advance)
 
     # Get current phase prompt
     phase_config = PHASE_PROMPTS[session["phase"]]
@@ -254,12 +252,17 @@ def _run_extraction(session: dict, signal: dict):
     raw_input = " ".join(session["raw_input_parts"])
     framing = session["framing"]
 
-    if phase == "tension":
-        # Run EpistemicModeClassifier
-        mode_result = run_skill("EpistemicModeClassifier", _with_lang({
-            "raw_input": raw_input,
-        }, session))
-        framing["Research Type"] = mode_result.get("mode", "")
+    if phase == "greeting":
+        # Extract owner name from signal
+        owner_name = signal.get("owner", "")
+        if owner_name:
+            framing["Owner"] = owner_name
+
+    elif phase == "tension":
+        # Research Type comes from user selection in the signal
+        research_type = signal.get("research_type", "")
+        if research_type:
+            framing["Research Type"] = research_type
 
         # Run TensionExtractor
         tension = run_skill("TensionExtractor", _with_lang({
@@ -328,9 +331,23 @@ def _run_extraction(session: dict, signal: dict):
         }, session))
         framing["Contribution"] = contrib_result.get("contribution", "")
 
-        # Set project name
-        raw_input = " ".join(session["raw_input_parts"])
-        framing["Project Name"] = raw_input[:100].strip().rstrip("?!.").strip()
+        # Generate Project Title via LLM
+        lang = session.get("language", "en")
+        lang_label = "繁體中文" if lang == "zh" else "English"
+        title_response = client.chat.completions.create(
+            model=MODEL,
+            messages=[
+                {"role": "system", "content": (
+                    f"You are an academic title generator. Given a research framing, "
+                    f"generate a concise, compelling academic project title in {lang_label}. "
+                    f"Max 15 words. Output ONLY the title, nothing else. No quotes."
+                )},
+                {"role": "user", "content": json.dumps(framing, ensure_ascii=False)},
+            ],
+            temperature=0.5,
+            max_tokens=60,
+        )
+        framing["Project Name"] = title_response.choices[0].message.content.strip().strip('"').strip()
 
 
 def run_logic_check(session_id: str) -> dict:
@@ -354,3 +371,59 @@ def run_logic_check(session_id: str) -> dict:
     })
 
     return result
+
+
+def generate_abstract(session_id: str) -> dict:
+    """
+    Generate a bilingual academic abstract (~150 words each) from the framing.
+
+    Returns:
+        {abstract_en, abstract_zh}
+    """
+    session = sessions.get(session_id)
+    if not session:
+        raise ValueError(f"Session {session_id} not found.")
+
+    framing = session["framing"]
+
+    prompt = (
+        "You are an academic writing assistant. Based on the research framing below, "
+        "generate TWO abstracts:\n\n"
+        "1. An English abstract (~150 words)\n"
+        "2. A Traditional Chinese (繁體中文) abstract (~150 字)\n\n"
+        "Each abstract should be a cohesive academic paragraph covering: "
+        "background/problem, purpose, method, expected results, and contribution.\n\n"
+        "Output format (use these exact headers):\n"
+        "## English Abstract\n[english text]\n\n"
+        "## 中文摘要\n[chinese text]\n\n"
+        "Do NOT include any other text or explanation."
+    )
+
+    response = client.chat.completions.create(
+        model=MODEL,
+        messages=[
+            {"role": "system", "content": prompt},
+            {"role": "user", "content": json.dumps(framing, ensure_ascii=False)},
+        ],
+        temperature=0.6,
+        max_tokens=1000,
+    )
+
+    raw = response.choices[0].message.content or ""
+
+    # Parse the two sections
+    abstract_en = ""
+    abstract_zh = ""
+
+    if "## English Abstract" in raw and "## 中文摘要" in raw:
+        parts = raw.split("## 中文摘要")
+        abstract_en = parts[0].replace("## English Abstract", "").strip()
+        abstract_zh = parts[1].strip() if len(parts) > 1 else ""
+    else:
+        # Fallback: return the whole thing
+        abstract_en = raw
+
+    return {
+        "abstract_en": abstract_en,
+        "abstract_zh": abstract_zh,
+    }
