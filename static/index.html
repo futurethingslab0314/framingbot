@@ -137,6 +137,72 @@
                 </div>
             </div>
 
+            <!-- Epistemic Profile Panel -->
+            <div class="epistemic-panel" id="epistemicPanel">
+                <div class="panel-header">
+                    <h3>🧠 Epistemic Profile</h3>
+                    <div class="panel-subtitle">調整認識論取向權重</div>
+                </div>
+                <div class="profile-sliders">
+                    <div class="slider-row">
+                        <label for="slider-exploratory">🔍 Exploratory</label>
+                        <input type="range" id="slider-exploratory" min="0" max="100" value="25" class="profile-slider">
+                        <span class="slider-value" id="val-exploratory">0.25</span>
+                    </div>
+                    <div class="slider-row">
+                        <label for="slider-critical">⚡ Critical</label>
+                        <input type="range" id="slider-critical" min="0" max="100" value="25" class="profile-slider">
+                        <span class="slider-value" id="val-critical">0.25</span>
+                    </div>
+                    <div class="slider-row">
+                        <label for="slider-problem_solving">🔧 Problem-solving</label>
+                        <input type="range" id="slider-problem_solving" min="0" max="100" value="25"
+                            class="profile-slider">
+                        <span class="slider-value" id="val-problem_solving">0.25</span>
+                    </div>
+                    <div class="slider-row">
+                        <label for="slider-constructive">🏗️ Constructive</label>
+                        <input type="range" id="slider-constructive" min="0" max="100" value="25"
+                            class="profile-slider">
+                        <span class="slider-value" id="val-constructive">0.25</span>
+                    </div>
+                </div>
+
+                <div class="panel-header" style="margin-top: 1rem;">
+                    <h3>🏷️ Keyword Map</h3>
+                    <div class="panel-subtitle">輸入關鍵字（以逗號分隔）</div>
+                </div>
+                <div class="keyword-inputs">
+                    <div class="keyword-row">
+                        <label for="kw-exploratory">🔍 Exploratory</label>
+                        <input type="text" id="kw-exploratory" placeholder="探索, 現象, 理解..." class="keyword-input">
+                    </div>
+                    <div class="keyword-row">
+                        <label for="kw-critical">⚡ Critical</label>
+                        <input type="text" id="kw-critical" placeholder="批判, 權力, 假設..." class="keyword-input">
+                    </div>
+                    <div class="keyword-row">
+                        <label for="kw-problem_solving">🔧 Problem-solving</label>
+                        <input type="text" id="kw-problem_solving" placeholder="解決, 改善, 效果..." class="keyword-input">
+                    </div>
+                    <div class="keyword-row">
+                        <label for="kw-constructive">🏗️ Constructive</label>
+                        <input type="text" id="kw-constructive" placeholder="建構, 框架, 設計..." class="keyword-input">
+                    </div>
+                </div>
+
+                <button class="btn btn-accent" id="btnApplyProfile" disabled>
+                    <span class="btn-icon">⚙️</span>
+                    Apply Changes
+                </button>
+
+                <!-- Rule Engine Output -->
+                <div class="rule-engine-output" id="ruleEngineOutput" style="display: none;">
+                    <h4>📋 Rule Engine Output</h4>
+                    <div id="ruleEngineContent"></div>
+                </div>
+            </div>
+
             <!-- Action Buttons -->
             <div class="action-buttons">
                 <button class="btn btn-primary" id="btnSaveNotion" disabled>

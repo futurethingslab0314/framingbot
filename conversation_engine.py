@@ -375,7 +375,8 @@ def run_logic_check(session_id: str) -> dict:
 
 def generate_abstract(session_id: str) -> dict:
     """
-    Generate a bilingual academic abstract (~150 words each) from the framing.
+    Generate a bilingual academic abstract (~150 words each) from the framing
+    using the AbstractGenerator skill.
 
     Returns:
         {abstract_en, abstract_zh}
@@ -386,44 +387,83 @@ def generate_abstract(session_id: str) -> dict:
 
     framing = session["framing"]
 
-    prompt = (
-        "You are an academic writing assistant. Based on the research framing below, "
-        "generate TWO abstracts:\n\n"
-        "1. An English abstract (~150 words)\n"
-        "2. A Traditional Chinese (繁體中文) abstract (~150 字)\n\n"
-        "Each abstract should be a cohesive academic paragraph covering: "
-        "background/problem, purpose, method, expected results, and contribution.\n\n"
-        "Output format (use these exact headers):\n"
-        "## English Abstract\n[english text]\n\n"
-        "## 中文摘要\n[chinese text]\n\n"
-        "Do NOT include any other text or explanation."
-    )
-
-    response = client.chat.completions.create(
-        model=MODEL,
-        messages=[
-            {"role": "system", "content": prompt},
-            {"role": "user", "content": json.dumps(framing, ensure_ascii=False)},
-        ],
-        temperature=0.6,
-        max_tokens=1000,
-    )
-
-    raw = response.choices[0].message.content or ""
-
-    # Parse the two sections
-    abstract_en = ""
-    abstract_zh = ""
-
-    if "## English Abstract" in raw and "## 中文摘要" in raw:
-        parts = raw.split("## 中文摘要")
-        abstract_en = parts[0].replace("## English Abstract", "").strip()
-        abstract_zh = parts[1].strip() if len(parts) > 1 else ""
-    else:
-        # Fallback: return the whole thing
-        abstract_en = raw
+    result = run_skill("AbstractGenerator", _with_lang({
+        "background": framing.get("Background", ""),
+        "purpose": framing.get("Purpose", ""),
+        "method": framing.get("Method", ""),
+        "result": framing.get("Result", ""),
+        "contribution": framing.get("Contribution", ""),
+        "epistemic_profile": session.get("_epistemic_profile", {}),
+        "rule_engine_output": session.get("_rule_engine_output", {}),
+    }, session))
 
     return {
-        "abstract_en": abstract_en,
-        "abstract_zh": abstract_zh,
+        "abstract_en": result.get("abstract_en", ""),
+        "abstract_zh": result.get("abstract_zh", ""),
     }
+
+
+def rerun_from_profile(session_id: str, epistemic_profile: dict, keyword_map: dict) -> dict:
+    """
+    Re-run partial pipeline after user adjusts epistemic_profile or keyword_map.
+
+    Steps re-executed:
+      1. EpistemicRuleEngine (with updated profile + keywords)
+      2. ResearchQuestionGenerator (with new rq_templates + logic_pattern)
+      3. MethodInferrer (with new method_bias)
+
+    Updates the session framing (RQ, Method) and returns the new state.
+    """
+    session = sessions.get(session_id)
+    if not session:
+        raise ValueError(f"Session {session_id} not found.")
+
+    framing = session["framing"]
+
+    # Persist the updated profile and keyword_map into the session
+    session["_epistemic_profile"] = epistemic_profile
+    session["_keyword_map"] = keyword_map
+
+    # --- Step 1: EpistemicRuleEngine ---
+    reo = run_skill("EpistemicRuleEngine", _with_lang({
+        "epistemic_profile": epistemic_profile,
+        "keyword_map": keyword_map,
+    }, session))
+    session["_rule_engine_output"] = reo
+
+    # --- Step 2: ResearchQuestionGenerator ---
+    research_position = framing.get("Purpose", "")
+    if research_position:
+        rq_result = run_skill("ResearchQuestionGenerator", _with_lang({
+            "research_position": research_position,
+            "rq_templates": reo.get("rq_templates", []),
+            "logic_pattern": reo.get("logic_pattern", ""),
+            "dominant_orientation": reo.get("dominant_orientation", ""),
+        }, session))
+
+        questions = rq_result.get("research_questions", [])
+        if questions:
+            framing["RQ"] = questions[0].get("question", "")
+            session["rq_candidates"] = questions
+
+    # --- Step 3: MethodInferrer ---
+    selected_rq = framing.get("RQ", "")
+    if selected_rq:
+        method_result = run_skill("MethodInferrer", _with_lang({
+            "selected_rq": selected_rq,
+            "method_bias": reo.get("method_bias", []),
+            "dominant_orientation": reo.get("dominant_orientation", ""),
+            "logic_pattern": reo.get("logic_pattern", ""),
+        }, session))
+        framing["Method"] = method_result.get("method", "")
+
+    _save_session(session)
+
+    return {
+        "framing": framing,
+        "rule_engine_output": reo,
+        "epistemic_profile": epistemic_profile,
+        "keyword_map": keyword_map,
+    }
+
+

@@ -13,6 +13,18 @@ const state = {
     phase: 'greeting',
     framing: {},
     isLoading: false,
+    epistemicProfile: {
+        exploratory: 0.25,
+        critical: 0.25,
+        problem_solving: 0.25,
+        constructive: 0.25,
+    },
+    keywordMap: {
+        exploratory: [],
+        critical: [],
+        problem_solving: [],
+        constructive: [],
+    },
 };
 
 // ---------------------------------------------------------------------------
@@ -42,6 +54,13 @@ const $btnGenerateAbstract = document.getElementById('btnGenerateAbstract');
 const $abstractResults = document.getElementById('abstractResults');
 const $abstractContent = document.getElementById('abstractContent');
 
+// Epistemic Profile refs
+const $btnApplyProfile = document.getElementById('btnApplyProfile');
+const $ruleEngineOutput = document.getElementById('ruleEngineOutput');
+const $ruleEngineContent = document.getElementById('ruleEngineContent');
+
+const ORIENTATIONS = ['exploratory', 'critical', 'problem_solving', 'constructive'];
+
 // Field ID map
 const FIELD_MAP = {
     'Owner': 'field-Owner',
@@ -56,12 +75,12 @@ const FIELD_MAP = {
 
 // Phase display names
 const PHASE_NAMES = {
-    greeting: '👋 開始',
-    tension_discovery: '🔍 探索張力',
-    positioning: '🎯 建立立場',
-    question_sharpening: '❓ 鍛造問題',
-    method_contribution: '🛠️ 方法與貢獻',
-    complete: '✅ 完成',
+    greeting: '開始 Start',
+    tension_discovery: '探索焦點 Focus Priming',
+    positioning: '建立觀點 Perspective Building',
+    question_sharpening: '聚焦問題 RQ Sharpening',
+    method_contribution: '方法與貢獻 Method & Contribution',
+    complete: '完成 Complete',
 };
 
 // ---------------------------------------------------------------------------
@@ -89,6 +108,79 @@ async function recreateSession() {
     state.sessionId = data.session_id;
     updatePhase(data.phase);
     return data.session_id;
+}
+
+// ---------------------------------------------------------------------------
+// Epistemic Profile helpers
+// ---------------------------------------------------------------------------
+
+function getSliderValue(orientation) {
+    const el = document.getElementById(`slider-${orientation}`);
+    return el ? parseInt(el.value, 10) / 100 : 0;
+}
+
+function setSliderValue(orientation, val) {
+    const slider = document.getElementById(`slider-${orientation}`);
+    const display = document.getElementById(`val-${orientation}`);
+    if (slider) slider.value = Math.round(val * 100);
+    if (display) display.textContent = val.toFixed(2);
+}
+
+function collectEpistemicProfile() {
+    const profile = {};
+    for (const o of ORIENTATIONS) {
+        profile[o] = getSliderValue(o);
+    }
+    return profile;
+}
+
+function collectKeywordMap() {
+    const map = {};
+    for (const o of ORIENTATIONS) {
+        const el = document.getElementById(`kw-${o}`);
+        const raw = el ? el.value.trim() : '';
+        map[o] = raw ? raw.split(',').map(s => s.trim()).filter(Boolean) : [];
+    }
+    return map;
+}
+
+function populateEpistemicUI(profile, keywordMap) {
+    if (profile) {
+        for (const o of ORIENTATIONS) {
+            if (profile[o] !== undefined) {
+                setSliderValue(o, profile[o]);
+                state.epistemicProfile[o] = profile[o];
+            }
+        }
+    }
+    if (keywordMap) {
+        for (const o of ORIENTATIONS) {
+            const el = document.getElementById(`kw-${o}`);
+            if (el && keywordMap[o]) {
+                el.value = Array.isArray(keywordMap[o]) ? keywordMap[o].join(', ') : '';
+                state.keywordMap[o] = keywordMap[o];
+            }
+        }
+    }
+}
+
+function displayRuleEngineOutput(reo) {
+    if (!reo) return;
+    let html = '';
+    if (reo.dominant_orientation) {
+        html += `<div class="reo-item"><span class="reo-label">Dominant</span><span class="reo-value">${reo.dominant_orientation}</span></div>`;
+    }
+    if (reo.logic_pattern) {
+        html += `<div class="reo-item"><span class="reo-label">Logic</span><span class="reo-value">${reo.logic_pattern}</span></div>`;
+    }
+    if (reo.method_bias && reo.method_bias.length) {
+        html += `<div class="reo-item"><span class="reo-label">Method bias</span><span class="reo-value">${reo.method_bias.join(', ')}</span></div>`;
+    }
+    if (reo.rq_templates && reo.rq_templates.length) {
+        html += `<div class="reo-item"><span class="reo-label">RQ templates</span><span class="reo-value">${reo.rq_templates.length} template(s)</span></div>`;
+    }
+    $ruleEngineContent.innerHTML = html;
+    $ruleEngineOutput.style.display = html ? 'block' : 'none';
 }
 
 // ---------------------------------------------------------------------------
@@ -172,6 +264,7 @@ function updateFraming(framing) {
     $btnSyncNotion.disabled = !state.sessionId;
     $btnLogicCheck.disabled = !framing['RQ'];
     $btnGenerateAbstract.disabled = !framing['RQ'];
+    $btnApplyProfile.disabled = !hasContent;
 }
 
 // ---------------------------------------------------------------------------
@@ -228,6 +321,11 @@ async function sendMessage(text) {
         updatePhase(data.phase);
         updateFraming(data.framing);
 
+        // If server returned epistemic data, populate the UI
+        if (data.epistemic_profile) {
+            populateEpistemicUI(data.epistemic_profile, data.keyword_map);
+        }
+
         if (data.extraction_happened) {
             const panel = document.querySelector('.structure-panel');
             panel.style.borderLeft = '2px solid rgba(139, 92, 246, 0.5)';
@@ -239,6 +337,54 @@ async function sendMessage(text) {
     } finally {
         setLoading(false);
         $chatInput.focus();
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Apply profile changes
+// ---------------------------------------------------------------------------
+
+async function applyProfileChanges() {
+    if (!state.sessionId) return;
+    $btnApplyProfile.disabled = true;
+    $btnApplyProfile.querySelector('.btn-icon').textContent = '⏳';
+
+    try {
+        const profile = collectEpistemicProfile();
+        const keywords = collectKeywordMap();
+
+        const data = await api('/chat/update-profile', {
+            session_id: state.sessionId,
+            epistemic_profile: profile,
+            keyword_map: keywords,
+        });
+
+        // Update framing with regenerated RQ and Method
+        if (data.framing) {
+            updateFraming(data.framing);
+        }
+
+        // Update rule engine output display
+        if (data.rule_engine_output) {
+            displayRuleEngineOutput(data.rule_engine_output);
+        }
+
+        state.epistemicProfile = profile;
+        state.keywordMap = keywords;
+
+        addMessage('agent', '⚙️ 認識論取向已更新！RQ 和方法已重新生成。');
+
+        // Highlight structure panel
+        const panel = document.querySelector('.structure-panel');
+        panel.style.borderLeft = '2px solid rgba(139, 92, 246, 0.5)';
+        setTimeout(() => { panel.style.borderLeft = 'none'; }, 1500);
+
+    } catch (err) {
+        addMessage('agent', `⚠️ 更新失敗：${err.message}`);
+        console.error(err);
+    } finally {
+        $btnApplyProfile.disabled = false;
+        $btnApplyProfile.querySelector('.btn-icon').textContent = '⚙️';
     }
 }
 
@@ -405,6 +551,20 @@ $btnSyncNotion.addEventListener('click', () => {
 });
 $btnLogicCheck.addEventListener('click', runLogicCheck);
 $btnGenerateAbstract.addEventListener('click', generateAbstract);
+
+// Epistemic profile sliders — update display value on change
+for (const o of ORIENTATIONS) {
+    const slider = document.getElementById(`slider-${o}`);
+    const display = document.getElementById(`val-${o}`);
+    if (slider && display) {
+        slider.addEventListener('input', () => {
+            display.textContent = (parseInt(slider.value, 10) / 100).toFixed(2);
+        });
+    }
+}
+
+// Apply profile button
+$btnApplyProfile.addEventListener('click', applyProfileChanges);
 
 // Modal
 $syncCancel.addEventListener('click', () => {

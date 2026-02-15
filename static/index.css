@@ -678,6 +678,159 @@ body {
     margin-top: 20px;
 }
 
+/* --------------- Epistemic Profile Panel --------------- */
+
+.epistemic-panel {
+    margin-top: 12px;
+    padding: 16px;
+    background: var(--bg-card);
+    border: 1px solid var(--border-glass);
+    border-radius: var(--radius-md);
+}
+
+.epistemic-panel .panel-header h3 {
+    font-size: 0.85rem;
+    font-weight: 600;
+}
+
+.profile-sliders,
+.keyword-inputs {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.slider-row,
+.keyword-row {
+    display: grid;
+    grid-template-columns: 140px 1fr 44px;
+    align-items: center;
+    gap: 10px;
+}
+
+.slider-row label,
+.keyword-row label {
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    white-space: nowrap;
+}
+
+.profile-slider {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 100%;
+    height: 6px;
+    border-radius: 3px;
+    background: rgba(255, 255, 255, 0.08);
+    outline: none;
+    transition: background 0.2s;
+}
+
+.profile-slider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--accent-purple);
+    cursor: pointer;
+    box-shadow: 0 0 8px var(--accent-purple-glow);
+    transition: transform 0.15s var(--ease-out);
+}
+
+.profile-slider::-webkit-slider-thumb:hover {
+    transform: scale(1.2);
+}
+
+.profile-slider::-moz-range-thumb {
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    background: var(--accent-purple);
+    cursor: pointer;
+    border: none;
+    box-shadow: 0 0 8px var(--accent-purple-glow);
+}
+
+.slider-value {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--text-accent);
+    text-align: right;
+    min-width: 36px;
+}
+
+.keyword-input {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.04);
+    border: 1px solid var(--border-glass);
+    border-radius: var(--radius-sm);
+    padding: 7px 10px;
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    font-size: 0.78rem;
+    transition: border-color 0.2s;
+    grid-column: 2 / 4;
+}
+
+.keyword-input:focus {
+    outline: none;
+    border-color: var(--border-active);
+    box-shadow: 0 0 0 3px var(--accent-purple-glow);
+}
+
+.keyword-input::placeholder {
+    color: var(--text-muted);
+}
+
+#btnApplyProfile {
+    margin-top: 14px;
+    width: 100%;
+}
+
+.rule-engine-output {
+    margin-top: 14px;
+    padding: 12px;
+    background: rgba(139, 92, 246, 0.06);
+    border: 1px solid rgba(139, 92, 246, 0.15);
+    border-radius: var(--radius-sm);
+}
+
+.rule-engine-output h4 {
+    font-size: 0.78rem;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: var(--text-accent);
+}
+
+.reo-item {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    padding: 3px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.reo-item:last-child {
+    border-bottom: none;
+}
+
+.reo-label {
+    color: var(--text-muted);
+    font-weight: 500;
+}
+
+.reo-value {
+    color: var(--text-primary);
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    max-width: 60%;
+    text-align: right;
+    word-break: break-word;
+}
+
 /* --------------- Responsive --------------- */
 @media (max-width: 900px) {
     .main-container {

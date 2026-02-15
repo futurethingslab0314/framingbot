@@ -1,21 +1,31 @@
 {
     "skill_name": "MethodInferrer",
-    "description": "Infers the most appropriate methodological approach from the epistemic mode and selected research question.",
+    "description": "Infers the most appropriate methodological approach using method_bias from EpistemicRuleEngine and the selected research question.",
     "input": {
-        "mode": {
-            "type": "string",
-            "enum": [
-                "Problem-solving",
-                "Exploratory",
-                "Constructive",
-                "Critical",
-                "Hybrid"
-            ],
-            "description": "The epistemic research mode."
-        },
         "selected_rq": {
             "type": "string",
             "description": "The chosen research question."
+        },
+        "method_bias": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            },
+            "description": "Methodological leanings from EpistemicRuleEngine (1–2 items)."
+        },
+        "dominant_orientation": {
+            "type": "string",
+            "enum": [
+                "problem_solving",
+                "exploratory",
+                "constructive",
+                "critical"
+            ],
+            "description": "The dominant epistemic orientation from EpistemicRuleEngine."
+        },
+        "logic_pattern": {
+            "type": "string",
+            "description": "The reasoning structure pattern from EpistemicRuleEngine."
         }
     },
     "output": {
@@ -28,6 +38,6 @@
     "output_format": "json",
     "model_requirements": {
         "temperature": 0.3,
-        "max_tokens": 200
+        "max_tokens": 250
     }
 }

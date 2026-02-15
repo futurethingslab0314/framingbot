@@ -1,0 +1,95 @@
+{
+    "skill_name": "AbstractGenerator",
+    "description": "Generates a concise academic abstract (~150 words) from research framing fields, guided by epistemic profile and rule engine output.",
+    "input": {
+        "background": {
+            "type": "string",
+            "description": "The research background and tension."
+        },
+        "purpose": {
+            "type": "string",
+            "description": "The research position / purpose statement."
+        },
+        "method": {
+            "type": "string",
+            "description": "The inferred methodological approach."
+        },
+        "result": {
+            "type": "string",
+            "description": "The expected research result."
+        },
+        "contribution": {
+            "type": "string",
+            "description": "The claimed contribution."
+        },
+        "epistemic_profile": {
+            "type": "object",
+            "description": "Soft distribution of epistemic orientation scores from EpistemicProfiler.",
+            "properties": {
+                "exploratory": {
+                    "type": "number"
+                },
+                "critical": {
+                    "type": "number"
+                },
+                "problem_solving": {
+                    "type": "number"
+                },
+                "constructive": {
+                    "type": "number"
+                }
+            },
+            "required": [
+                "exploratory",
+                "critical",
+                "problem_solving",
+                "constructive"
+            ]
+        },
+        "rule_engine_output": {
+            "type": "object",
+            "description": "Outputs from EpistemicRuleEngine.",
+            "properties": {
+                "dominant_orientation": {
+                    "type": "string"
+                },
+                "rq_templates": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "method_bias": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "logic_pattern": {
+                    "type": "string"
+                }
+            },
+            "required": [
+                "dominant_orientation",
+                "method_bias",
+                "logic_pattern"
+            ]
+        }
+    },
+    "output": {
+        "abstract_en": {
+            "type": "string",
+            "description": "English academic abstract (~150 words)."
+        },
+        "abstract_zh": {
+            "type": "string",
+            "description": "Traditional Chinese academic abstract (~150 字)."
+        }
+    },
+    "prompt_file": "prompt.md",
+    "output_format": "json",
+    "model_requirements": {
+        "temperature": 0.4,
+        "max_tokens": 800
+    }
+}

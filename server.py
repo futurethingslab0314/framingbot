@@ -35,6 +35,7 @@ from conversation_engine import (
     update_framing,
     run_logic_check,
     generate_abstract,
+    rerun_from_profile,
 )
 
 # ---------------------------------------------------------------------------
@@ -89,6 +90,12 @@ class ChatMessageRequest(BaseModel):
 
 class LogicCheckRequest(BaseModel):
     session_id: str
+
+
+class ProfileUpdateRequest(BaseModel):
+    session_id: str
+    epistemic_profile: dict
+    keyword_map: dict
 
 
 class NotionSyncRequest(BaseModel):
@@ -207,6 +214,22 @@ def chat_generate_abstract(request: LogicCheckRequest):
     """Generate a bilingual academic abstract from the current framing."""
     try:
         result = generate_abstract(request.session_id)
+        return result
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/chat/update-profile")
+def chat_update_profile(request: ProfileUpdateRequest):
+    """Re-run EpistemicRuleEngine → RQ → Method after profile/keyword changes."""
+    try:
+        result = rerun_from_profile(
+            request.session_id,
+            request.epistemic_profile,
+            request.keyword_map,
+        )
         return result
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))

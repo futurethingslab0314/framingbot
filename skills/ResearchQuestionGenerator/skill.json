@@ -1,48 +1,54 @@
 {
     "skill_name": "ResearchQuestionGenerator",
-    "description": "Generates 3 structurally different research questions (Mechanism, Interpretation, Design space) from a research position and mode.",
+    "description": "Generates research questions from a research position, using rq_templates and logic_pattern provided by EpistemicRuleEngine.",
     "input": {
         "research_position": {
             "type": "string",
             "description": "The declarative research position from ResearchPositionBuilder."
         },
-        "mode": {
+        "rq_templates": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            },
+            "description": "Research question templates from EpistemicRuleEngine (2–3 items)."
+        },
+        "logic_pattern": {
+            "type": "string",
+            "description": "The reasoning structure pattern from EpistemicRuleEngine (e.g. 'gap → hypothesis → method → evidence → solution')."
+        },
+        "dominant_orientation": {
             "type": "string",
             "enum": [
-                "Problem-solving",
-                "Exploratory",
-                "Constructive",
-                "Critical",
-                "Hybrid"
+                "problem_solving",
+                "exploratory",
+                "constructive",
+                "critical"
             ],
-            "description": "The epistemic research mode from EpistemicModeClassifier."
+            "description": "The dominant epistemic orientation from EpistemicRuleEngine."
         }
     },
     "output": {
         "research_questions": {
             "type": "array",
-            "description": "Exactly 3 research questions, one per type.",
+            "description": "Research questions generated from the provided templates.",
             "items": {
                 "type": "object",
                 "properties": {
-                    "type": {
+                    "template": {
                         "type": "string",
-                        "enum": [
-                            "Mechanism",
-                            "Interpretation",
-                            "Design space"
-                        ]
+                        "description": "The original rq_template this question was derived from."
                     },
                     "question": {
                         "type": "string"
                     }
                 },
                 "required": [
-                    "type",
+                    "template",
                     "question"
                 ]
             },
-            "minItems": 3,
+            "minItems": 2,
             "maxItems": 3
         }
     },
@@ -50,6 +56,6 @@
     "output_format": "json",
     "model_requirements": {
         "temperature": 0.5,
-        "max_tokens": 400
+        "max_tokens": 500
     }
 }

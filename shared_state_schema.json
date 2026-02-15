@@ -120,6 +120,113 @@
                 "scope_issues",
                 "alignment_assessment"
             ]
+        },
+        "epistemic_profile": {
+            "type": "object",
+            "description": "A soft distribution of epistemic orientation scores (each 0–1).",
+            "properties": {
+                "exploratory": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1,
+                    "description": "Degree of exploratory orientation."
+                },
+                "critical": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1,
+                    "description": "Degree of critical orientation."
+                },
+                "problem_solving": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1,
+                    "description": "Degree of problem-solving orientation."
+                },
+                "constructive": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1,
+                    "description": "Degree of constructive orientation."
+                }
+            },
+            "required": [
+                "exploratory",
+                "critical",
+                "problem_solving",
+                "constructive"
+            ]
+        },
+        "keyword_map": {
+            "type": "object",
+            "description": "Keywords extracted from user input mapped to each epistemic orientation.",
+            "properties": {
+                "exploratory": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "description": "Keywords signalling exploratory orientation."
+                },
+                "critical": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "description": "Keywords signalling critical orientation."
+                },
+                "problem_solving": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "description": "Keywords signalling problem-solving orientation."
+                },
+                "constructive": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "description": "Keywords signalling constructive orientation."
+                }
+            },
+            "required": [
+                "exploratory",
+                "critical",
+                "problem_solving",
+                "constructive"
+            ]
+        },
+        "rule_engine_output": {
+            "type": "object",
+            "description": "Deterministic outputs derived from the epistemic profile by the rule engine.",
+            "properties": {
+                "dominant_orientation": {
+                    "type": "string",
+                    "description": "The primary epistemic orientation determined by the rule engine."
+                },
+                "rq_templates": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "description": "Research question templates matched to the dominant orientation."
+                },
+                "method_bias": {
+                    "type": "string",
+                    "description": "Suggested methodological leaning based on the orientation."
+                },
+                "logic_pattern": {
+                    "type": "string",
+                    "description": "Expected logical structure pattern for the framing."
+                }
+            },
+            "required": [
+                "dominant_orientation",
+                "rq_templates",
+                "method_bias",
+                "logic_pattern"
+            ]
         }
     },
     "required": [
@@ -131,6 +238,9 @@
         "selected_rq",
         "result_type",
         "contribution",
-        "coherence_notes"
+        "coherence_notes",
+        "epistemic_profile",
+        "keyword_map",
+        "rule_engine_output"
     ]
 }

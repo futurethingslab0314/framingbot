@@ -1,0 +1,96 @@
+{
+    "skill_name": "EpistemicRuleEngine",
+    "description": "Deterministic rule engine that takes an epistemic profile and keyword map to produce dominant orientation, RQ templates, method bias, and logic pattern.",
+    "input": {
+        "epistemic_profile": {
+            "type": "object",
+            "description": "Soft distribution of epistemic orientation scores.",
+            "properties": {
+                "exploratory": {
+                    "type": "number"
+                },
+                "critical": {
+                    "type": "number"
+                },
+                "problem_solving": {
+                    "type": "number"
+                },
+                "constructive": {
+                    "type": "number"
+                }
+            },
+            "required": [
+                "exploratory",
+                "critical",
+                "problem_solving",
+                "constructive"
+            ]
+        },
+        "keyword_map": {
+            "type": "object",
+            "description": "Keywords mapped to each epistemic orientation.",
+            "properties": {
+                "exploratory": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "critical": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "problem_solving": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "constructive": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            },
+            "required": [
+                "exploratory",
+                "critical",
+                "problem_solving",
+                "constructive"
+            ]
+        }
+    },
+    "output": {
+        "dominant_orientation": {
+            "type": "string",
+            "description": "The primary epistemic orientation with the highest weight."
+        },
+        "rq_templates": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            },
+            "description": "Research question templates matched to the dominant orientation."
+        },
+        "method_bias": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            },
+            "description": "Suggested methodological leanings based on the orientation."
+        },
+        "logic_pattern": {
+            "type": "string",
+            "description": "Expected logical structure pattern for the framing."
+        }
+    },
+    "prompt_file": "prompt.md",
+    "output_format": "json",
+    "model_requirements": {
+        "temperature": 0.2,
+        "max_tokens": 600
+    }
+}
