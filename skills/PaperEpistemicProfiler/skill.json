@@ -1,0 +1,87 @@
+{
+    "skill_name": "PaperEpistemicProfiler",
+    "description": "Analyze a research paper and infer its epistemic orientation and candidate keywords for design research framing.",
+    "input": {
+        "title": {
+            "type": "string",
+            "description": "The title of the research paper."
+        },
+        "abstract": {
+            "type": "string",
+            "description": "The abstract of the research paper."
+        },
+        "tags": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            },
+            "description": "Optional tags or keywords already associated with the paper.",
+            "required": false
+        }
+    },
+    "output": {
+        "orientation_scores": {
+            "type": "object",
+            "description": "Estimated epistemic orientation scores (0–1, sum ≈ 1).",
+            "properties": {
+                "exploratory": {
+                    "type": "number"
+                },
+                "critical": {
+                    "type": "number"
+                },
+                "problem_solving": {
+                    "type": "number"
+                },
+                "constructive": {
+                    "type": "number"
+                }
+            }
+        },
+        "suggested_keywords": {
+            "type": "array",
+            "description": "5–10 candidate keywords aligned with design research framing.",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "text": {
+                        "type": "string",
+                        "description": "The keyword term."
+                    },
+                    "orientation": {
+                        "type": "string",
+                        "enum": [
+                            "exploratory",
+                            "critical",
+                            "problem_solving",
+                            "constructive"
+                        ]
+                    },
+                    "role": {
+                        "type": "string",
+                        "enum": [
+                            "rq_trigger",
+                            "method_bias",
+                            "contribution_frame",
+                            "tone_modifier"
+                        ]
+                    },
+                    "weight": {
+                        "type": "number",
+                        "description": "Relevance weight (0.0–1.0)."
+                    },
+                    "notes": {
+                        "type": "string",
+                        "description": "Brief reasoning for why this keyword is suggested."
+                    }
+                }
+            }
+        }
+    },
+    "prompt_file": "prompt.md",
+    "output_format": "json",
+    "model_requirements": {
+        "temperature": 0.3,
+        "max_tokens": 1500
+    }
+}

@@ -1,10 +1,23 @@
 {
     "pipeline_name": "FramingAgent",
-    "description": "End-to-end research framing pipeline. Classifies epistemic mode, extracts tension, builds research position, generates research questions, claims contribution, and checks coherence.",
+    "description": "End-to-end research framing pipeline. Syncs keywords first, classifies epistemic mode, runs the rule engine, then generates all framing components in order: Background → Purpose → RQ → Method → Result → Contribution → Coherence → Abstract.",
     "shared_state_schema": "shared_state_schema.json",
     "steps": [
         {
             "step": 1,
+            "skill": "NotionKeywordSync",
+            "description": "Sync keywords from Notion. Must run before any reasoning steps.",
+            "input_mapping": {
+                "keywords": "state.keywords"
+            },
+            "output_mapping": {
+                "state.keyword_map": "output.keyword_map",
+                "state.keyword_roles": "output.keyword_roles",
+                "state.epistemic_profile": "output.epistemic_profile"
+            }
+        },
+        {
+            "step": 2,
             "skill": "EpistemicModeClassifier",
             "input_mapping": {
                 "raw_input": "state.raw_input"
@@ -14,7 +27,24 @@
             }
         },
         {
-            "step": 2,
+            "step": 3,
+            "skill": "EpistemicRuleEngine",
+            "description": "Must run immediately after NotionKeywordSync so downstream skills see rule-engine outputs.",
+            "input_mapping": {
+                "epistemic_profile": "state.epistemic_profile",
+                "keyword_map": "state.keyword_map",
+                "keyword_roles": "state.keyword_roles"
+            },
+            "output_mapping": {
+                "state.rule_engine_output.dominant_orientation": "output.dominant_orientation",
+                "state.rule_engine_output.rq_templates": "output.rq_templates",
+                "state.rule_engine_output.method_bias": "output.method_bias",
+                "state.rule_engine_output.contribution_bias": "output.contribution_bias",
+                "state.rule_engine_output.logic_pattern": "output.logic_pattern"
+            }
+        },
+        {
+            "step": 4,
             "skill": "TensionExtractor",
             "input_mapping": {
                 "raw_input": "state.raw_input"
@@ -26,60 +56,118 @@
             }
         },
         {
-            "step": 3,
+            "step": 5,
             "skill": "ResearchPositionBuilder",
+            "description": "Generates Background and Purpose from mode, tension, and rule-engine context.",
             "input_mapping": {
                 "mode": "state.mode",
-                "tension": "state.tension"
+                "tension": "state.tension",
+                "rule_engine_output": "state.rule_engine_output"
             },
             "output_mapping": {
                 "state.research_position": "output.research_position"
             }
         },
         {
-            "step": 4,
+            "step": 6,
             "skill": "ResearchQuestionGenerator",
             "input_mapping": {
                 "research_position": "state.research_position",
-                "mode": "state.mode"
+                "mode": "state.mode",
+                "rule_engine_output": "state.rule_engine_output"
             },
             "output_mapping": {
                 "state.research_questions": "output.research_questions"
             }
         },
         {
-            "step": 5,
+            "step": 7,
             "skill": null,
             "action": "auto_select",
             "description": "Auto-select the first research question as selected_rq.",
             "logic": "state.selected_rq = state.research_questions[0].question"
         },
         {
-            "step": 6,
+            "step": 8,
+            "skill": "MethodInferrer",
+            "input_mapping": {
+                "selected_rq": "state.selected_rq",
+                "mode": "state.mode",
+                "rule_engine_output": "state.rule_engine_output"
+            },
+            "output_mapping": {
+                "state.method": "output.method"
+            }
+        },
+        {
+            "step": 9,
+            "skill": "MethodLogicAligner",
+            "description": "Aligns method suggestions with the epistemic stance using selected_rq and rule_engine_output.",
+            "input_mapping": {
+                "selected_rq": "state.selected_rq",
+                "method": "state.method",
+                "rule_engine_output": "state.rule_engine_output",
+                "mode": "state.mode"
+            },
+            "output_mapping": {
+                "state.method_alignment": "output.method_alignment"
+            }
+        },
+        {
+            "step": 10,
+            "skill": "ResultInferrer",
+            "input_mapping": {
+                "selected_rq": "state.selected_rq",
+                "method": "state.method",
+                "mode": "state.mode"
+            },
+            "output_mapping": {
+                "state.result_type": "output.result_type"
+            }
+        },
+        {
+            "step": 11,
             "skill": "ContributionClaimer",
             "input_mapping": {
                 "selected_rq": "state.selected_rq",
                 "mode": "state.mode",
-                "tension": "state.tension"
+                "tension": "state.tension",
+                "result_type": "state.result_type"
             },
             "output_mapping": {
-                "state.result_type": "output.result_type",
                 "state.contribution": "output.contribution"
             }
         },
         {
-            "step": 7,
+            "step": 12,
             "skill": "CoherenceChecker",
             "input_mapping": {
                 "mode": "state.mode",
                 "selected_rq": "state.selected_rq",
                 "tension": "state.tension",
+                "method": "state.method",
+                "result_type": "state.result_type",
                 "contribution": "state.contribution"
             },
             "output_mapping": {
                 "state.coherence_notes.logical_gaps": "output.logical_gaps",
                 "state.coherence_notes.scope_issues": "output.scope_issues",
                 "state.coherence_notes.alignment_assessment": "output.alignment_assessment"
+            }
+        },
+        {
+            "step": 13,
+            "skill": "AbstractGenerator",
+            "description": "Synthesizes only from the five components (Background, Purpose, Method, Result, Contribution). Does NOT introduce new claims.",
+            "input_mapping": {
+                "research_position": "state.research_position",
+                "selected_rq": "state.selected_rq",
+                "method": "state.method",
+                "result_type": "state.result_type",
+                "contribution": "state.contribution"
+            },
+            "output_mapping": {
+                "state.abstract": "output.abstract"
             }
         }
     ],

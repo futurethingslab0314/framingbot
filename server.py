@@ -5,14 +5,16 @@ Provides REST API endpoints for the Research Framing Pipeline.
 Designed for deployment on Railway.
 
 Endpoints:
-  GET  /             — Serve the frontend UI.
-  GET  /health       — Health check.
-  POST /run          — Run the full internal pipeline (shared state output).
-  POST /notion-run   — Run the Notion-mapped pipeline + auto-write to Notion.
-  POST /chat/start   — Start a guided conversation session.
-  POST /chat/message — Send a message in a conversation session.
-  POST /chat/logic-check — Run coherence check on current framing.
-  POST /notion-sync  — Sync framing data back from Notion.
+  GET  /                  — Serve the frontend UI.
+  GET  /health            — Health check.
+  GET  /api/keywords      — Fetch keywords from the Notion keyword database.
+  POST /api/apply-keywords — Apply keywords → NotionKeywordSync + EpistemicRuleEngine.
+  POST /run               — Run the full internal pipeline (shared state output).
+  POST /notion-run        — Run the Notion-mapped pipeline + auto-write to Notion.
+  POST /chat/start        — Start a guided conversation session.
+  POST /chat/message      — Send a message in a conversation session.
+  POST /chat/logic-check  — Run coherence check on current framing.
+  POST /notion-sync       — Sync framing data back from Notion.
 """
 
 from fastapi import FastAPI, HTTPException
@@ -25,9 +27,9 @@ import json
 import os
 from pathlib import Path
 
-from framing_agent import run_pipeline
+from framing_agent import run_pipeline, update_keywords
 from research_framing_agent import run_notion_pipeline
-from notion_writer import write_to_notion
+from notion_writer import write_to_notion, fetch_keywords
 from conversation_engine import (
     start_session,
     process_message,
@@ -129,6 +131,57 @@ def serve_frontend():
 @app.get("/health")
 def health_check():
     return {"status": "ok"}
+
+
+# ---------------------------------------------------------------------------
+# Keyword endpoints
+# ---------------------------------------------------------------------------
+
+# In-memory state for keyword apply (lightweight; replace with session
+# storage or a DB if persistence across restarts is needed).
+_keyword_state: dict = {}
+
+
+@app.get("/api/keywords")
+def get_keywords():
+    """Fetch all keywords from the Notion keyword database."""
+    try:
+        keywords = fetch_keywords()
+        return keywords
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@app.post("/api/apply-keywords")
+def apply_keywords(data: dict):
+    """
+    Apply keywords through NotionKeywordSync + EpistemicRuleEngine.
+
+    Accepts either:
+      { "keywords": [ {term, role, weight?}, … ] }   — flat list
+    or the direct output of GET /api/keywords.
+    """
+    try:
+        global _keyword_state
+        # Accept both {keywords: [...]}, and the full fetch_keywords() shape
+        kw_list = data.get("keywords", [])
+        if not isinstance(kw_list, list):
+            raise HTTPException(
+                status_code=400,
+                detail="'keywords' must be a list of {term, role, weight?} objects.",
+            )
+        # Initialise state on first call (or re-use existing)
+        if not _keyword_state:
+            import copy
+            from framing_agent import INITIAL_STATE
+            _keyword_state = copy.deepcopy(INITIAL_STATE)
+
+        updated = update_keywords(_keyword_state, kw_list)
+        return {"status": "updated", "state": updated}
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 # ---------------------------------------------------------------------------

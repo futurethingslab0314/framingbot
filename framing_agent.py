@@ -1,19 +1,21 @@
 """
 FramingAgent — Research Framing Pipeline Orchestrator
 
-Executes 9 sequential steps to transform a raw research input into
+Executes 10 sequential steps to transform a raw research input into
 a fully structured framing artifact with coherence validation.
 
 Pipeline:
-  1. EpistemicModeClassifier   → mode
-  2. TensionExtractor          → tension
-  3. EpistemicRuleEngine        → rule_engine_output (dominant_orientation, rq_templates, method_bias, logic_pattern)
-  4. ResearchPositionBuilder   → research_position
-  5. ResearchQuestionGenerator → research_questions[]
-  6. MethodInferrer            → method (using method_bias)
-  7. ContributionClaimer       → result_type + contribution
-  8. CoherenceChecker          → coherence_notes
-  9. AbstractGenerator         → abstract_en + abstract_zh
+  1.  NotionKeywordSync          → keyword_map, keyword_roles, epistemic_profile
+  2.  EpistemicModeClassifier    → mode (may refine epistemic_profile / keyword_map)
+  3.  EpistemicRuleEngine        → rule_engine_output (dominant_orientation, rq_templates,
+                                    method_bias, contribution_bias, logic_pattern)
+  4.  TensionExtractor           → tension
+  5.  ResearchPositionBuilder    → research_position
+  6.  ResearchQuestionGenerator  → research_questions[]
+  7.  MethodLogicAligner         → method + alignment_rationale
+  8.  ContributionClaimer        → result_type + contribution
+  9.  CoherenceChecker           → coherence_notes
+  10. AbstractGenerator          → abstract_en + abstract_zh
 """
 
 import json
@@ -49,10 +51,12 @@ INITIAL_STATE = {
         "problem_solving": [],
         "constructive": [],
     },
+    "keyword_roles": {},
     "rule_engine_output": {
         "dominant_orientation": "",
         "rq_templates": [],
         "method_bias": [],
+        "contribution_bias": [],
         "logic_pattern": "",
     },
     "research_position": "",
@@ -151,16 +155,66 @@ def run_skill(skill_name: str, skill_input: dict) -> dict:
 
 
 # ---------------------------------------------------------------------------
+# Partial re-run helper (used by /api/apply-keywords)
+# ---------------------------------------------------------------------------
+
+
+def update_keywords(state: dict, keywords: list) -> dict:
+    """
+    Re-run NotionKeywordSync + EpistemicRuleEngine with new keywords
+    and update *state* in-place.
+
+    Args:
+        state:    The current shared-state dict (mutated in-place).
+        keywords: Flat list of keyword objects [{term, role, weight?}, …].
+
+    Returns:
+        The updated state dict.
+    """
+    # 1. NotionKeywordSync
+    print("[update_keywords] Running NotionKeywordSync ...")
+    result = run_skill("NotionKeywordSync", {"keywords": keywords})
+    state["keyword_map"] = result.get("keyword_map", state["keyword_map"])
+    state["keyword_roles"] = result.get("keyword_roles", {})
+    state["epistemic_profile"] = result.get(
+        "epistemic_profile", state["epistemic_profile"]
+    )
+
+    # 2. EpistemicRuleEngine
+    print("[update_keywords] Re-running EpistemicRuleEngine ...")
+    result = run_skill("EpistemicRuleEngine", {
+        "epistemic_profile": state["epistemic_profile"],
+        "keyword_map": state["keyword_map"],
+        "keyword_roles": state["keyword_roles"],
+    })
+    state["rule_engine_output"] = {
+        "dominant_orientation": result.get("dominant_orientation", ""),
+        "rq_templates": result.get("rq_templates", []),
+        "method_bias": result.get("method_bias", []),
+        "contribution_bias": result.get("contribution_bias", []),
+        "logic_pattern": result.get("logic_pattern", ""),
+    }
+    print(
+        f"[update_keywords] → dominant: "
+        f"{state['rule_engine_output']['dominant_orientation']}"
+    )
+
+    return state
+
+
+# ---------------------------------------------------------------------------
 # Pipeline
 # ---------------------------------------------------------------------------
 
 
-def run_pipeline(raw_input: str) -> dict:
+def run_pipeline(raw_input: str, keywords: list | None = None) -> dict:
     """
-    Execute the full FramingAgent pipeline (9 steps).
+    Execute the full FramingAgent pipeline (10 steps).
 
     Args:
-        raw_input: The user's raw research topic / idea.
+        raw_input:  The user's raw research topic / idea.
+        keywords:   Optional list of keyword objects [{term, role, weight?}, …]
+                    from Notion or other sources.
 
     Returns:
         The final shared state dict (the structured framing artifact).
@@ -168,23 +222,59 @@ def run_pipeline(raw_input: str) -> dict:
     state = copy.deepcopy(INITIAL_STATE)
     state["raw_input"] = raw_input
 
-    # --- Step 1: EpistemicModeClassifier ---
-    print("[1/9] Running EpistemicModeClassifier ...")
+    # --- Step 1: NotionKeywordSync ---
+    print("[1/10] Running NotionKeywordSync ...")
+    kw_input = keywords if keywords else []
+    result = run_skill("NotionKeywordSync", {
+        "keywords": kw_input,
+    })
+    state["keyword_map"] = result.get("keyword_map", state["keyword_map"])
+    state["keyword_roles"] = result.get("keyword_roles", {})
+    state["epistemic_profile"] = result.get("epistemic_profile", state["epistemic_profile"])
+    print(f"       → keyword_map populated, profile calculated")
+
+    # --- Step 2: EpistemicModeClassifier ---
+    print("[2/10] Running EpistemicModeClassifier ...")
     result = run_skill("EpistemicModeClassifier", {
         "raw_input": state["raw_input"],
     })
     state["mode"] = result["mode"]
-    # Also populate epistemic_profile from classifier scores if available
+    # Merge classifier-provided profile/keywords if available (additive)
     if "epistemic_profile" in result:
-        state["epistemic_profile"] = result["epistemic_profile"]
+        for k, v in result["epistemic_profile"].items():
+            if k in state["epistemic_profile"]:
+                state["epistemic_profile"][k] = max(state["epistemic_profile"][k], v)
     if "keyword_map" in result:
-        state["keyword_map"] = result["keyword_map"]
+        for k, v in result["keyword_map"].items():
+            if k in state["keyword_map"]:
+                existing = set(state["keyword_map"][k])
+                existing.update(v)
+                state["keyword_map"][k] = list(existing)
     print(f"       → mode: {state['mode']}")
 
-    # --- Step 2: TensionExtractor ---
-    print("[2/9] Running TensionExtractor ...")
+    # --- Step 3: EpistemicRuleEngine ---
+    print("[3/10] Running EpistemicRuleEngine ...")
+    result = run_skill("EpistemicRuleEngine", {
+        "epistemic_profile": state["epistemic_profile"],
+        "keyword_map": state["keyword_map"],
+        "keyword_roles": state["keyword_roles"],
+    })
+    state["rule_engine_output"] = {
+        "dominant_orientation": result.get("dominant_orientation", ""),
+        "rq_templates": result.get("rq_templates", []),
+        "method_bias": result.get("method_bias", []),
+        "contribution_bias": result.get("contribution_bias", []),
+        "logic_pattern": result.get("logic_pattern", ""),
+    }
+    print(f"       → dominant: {state['rule_engine_output']['dominant_orientation']}")
+
+    reo = state["rule_engine_output"]
+
+    # --- Step 4: TensionExtractor ---
+    print("[4/10] Running TensionExtractor ...")
     result = run_skill("TensionExtractor", {
         "raw_input": state["raw_input"],
+        "keyword_map": state["keyword_map"],
     })
     state["tension"] = {
         "dominant_assumption": result["dominant_assumption"],
@@ -193,74 +283,70 @@ def run_pipeline(raw_input: str) -> dict:
     }
     print("       → tension extracted")
 
-    # --- Step 3: EpistemicRuleEngine ---
-    print("[3/9] Running EpistemicRuleEngine ...")
-    result = run_skill("EpistemicRuleEngine", {
-        "epistemic_profile": state["epistemic_profile"],
-        "keyword_map": state["keyword_map"],
-    })
-    state["rule_engine_output"] = {
-        "dominant_orientation": result["dominant_orientation"],
-        "rq_templates": result["rq_templates"],
-        "method_bias": result["method_bias"],
-        "logic_pattern": result["logic_pattern"],
-    }
-    print(f"       → dominant: {state['rule_engine_output']['dominant_orientation']}")
-
-    # --- Step 4: ResearchPositionBuilder ---
-    print("[4/9] Running ResearchPositionBuilder ...")
+    # --- Step 5: ResearchPositionBuilder ---
+    print("[5/10] Running ResearchPositionBuilder ...")
     result = run_skill("ResearchPositionBuilder", {
         "mode": state["mode"],
         "tension": state["tension"],
+        "keyword_map": state["keyword_map"],
+        "dominant_orientation": reo["dominant_orientation"],
     })
     state["research_position"] = result["research_position"]
     print(f"       → position: {state['research_position'][:80]}...")
 
-    # --- Step 5: ResearchQuestionGenerator ---
-    print("[5/9] Running ResearchQuestionGenerator ...")
-    reo = state["rule_engine_output"]
+    # --- Step 6: ResearchQuestionGenerator ---
+    print("[6/10] Running ResearchQuestionGenerator ...")
     result = run_skill("ResearchQuestionGenerator", {
         "research_position": state["research_position"],
         "rq_templates": reo["rq_templates"],
         "logic_pattern": reo["logic_pattern"],
         "dominant_orientation": reo["dominant_orientation"],
+        "keyword_map": state["keyword_map"],
     })
     state["research_questions"] = result["research_questions"]
     print(f"       → {len(state['research_questions'])} questions generated")
 
     # Auto-select first RQ
-    state["selected_rq"] = state["research_questions"][0]["question"]
-    print(f"       → selected: {state['selected_rq'][:80]}...")
+    if state["research_questions"]:
+        state["selected_rq"] = state["research_questions"][0]["question"]
+        print(f"       → selected: {state['selected_rq'][:80]}...")
 
-    # --- Step 6: MethodInferrer ---
-    print("[6/9] Running MethodInferrer ...")
-    result = run_skill("MethodInferrer", {
+    # --- Step 7: MethodLogicAligner ---
+    print("[7/10] Running MethodLogicAligner ...")
+    result = run_skill("MethodLogicAligner", {
         "selected_rq": state["selected_rq"],
         "method_bias": reo["method_bias"],
+        "contribution_bias": reo["contribution_bias"],
         "dominant_orientation": reo["dominant_orientation"],
         "logic_pattern": reo["logic_pattern"],
+        "keyword_map": state["keyword_map"],
+        "tension": state["tension"],
     })
-    state["method"] = result["method"]
+    state["method"] = result.get("method", "")
     print(f"       → method: {state['method'][:80]}...")
 
-    # --- Step 7: ContributionClaimer ---
-    print("[7/9] Running ContributionClaimer ...")
+    # --- Step 8: ContributionClaimer ---
+    print("[8/10] Running ContributionClaimer ...")
     result = run_skill("ContributionClaimer", {
         "selected_rq": state["selected_rq"],
         "mode": state["mode"],
         "tension": state["tension"],
+        "keyword_map": state["keyword_map"],
+        "contribution_bias": reo["contribution_bias"],
     })
     state["result_type"] = result["result_type"]
     state["contribution"] = result["contribution"]
     print(f"       → result_type: {state['result_type']}")
 
-    # --- Step 8: CoherenceChecker ---
-    print("[8/9] Running CoherenceChecker ...")
+    # --- Step 9: CoherenceChecker ---
+    print("[9/10] Running CoherenceChecker ...")
     result = run_skill("CoherenceChecker", {
         "mode": state["mode"],
         "selected_rq": state["selected_rq"],
         "tension": state["tension"],
         "contribution": state["contribution"],
+        "method": state["method"],
+        "keyword_map": state["keyword_map"],
     })
     state["coherence_notes"] = {
         "logical_gaps": result["logical_gaps"],
@@ -269,8 +355,8 @@ def run_pipeline(raw_input: str) -> dict:
     }
     print(f"       → alignment: {state['coherence_notes']['alignment_assessment'][:80]}...")
 
-    # --- Step 9: AbstractGenerator ---
-    print("[9/9] Running AbstractGenerator ...")
+    # --- Step 10: AbstractGenerator ---
+    print("[10/10] Running AbstractGenerator ...")
     result = run_skill("AbstractGenerator", {
         "background": f"{state['tension']['dominant_assumption']} "
                       f"{state['tension']['blind_spot']} "
@@ -281,6 +367,7 @@ def run_pipeline(raw_input: str) -> dict:
         "contribution": state["contribution"],
         "epistemic_profile": state["epistemic_profile"],
         "rule_engine_output": state["rule_engine_output"],
+        "keyword_map": state["keyword_map"],
     })
     state["abstract_en"] = result.get("abstract_en", "")
     state["abstract_zh"] = result.get("abstract_zh", "")
@@ -308,3 +395,4 @@ if __name__ == "__main__":
     print("FINAL FRAMING ARTIFACT")
     print("=" * 60)
     print(json.dumps(final_state, indent=2, ensure_ascii=False))
+

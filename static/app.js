@@ -54,6 +54,9 @@ const $btnGenerateAbstract = document.getElementById('btnGenerateAbstract');
 const $abstractResults = document.getElementById('abstractResults');
 const $abstractContent = document.getElementById('abstractContent');
 
+const $btnLoadKeywords = document.getElementById('btnLoadKeywords');
+const $btnApplyKeywords = document.getElementById('btnApplyKeywords');
+
 // Epistemic Profile refs
 const $btnApplyProfile = document.getElementById('btnApplyProfile');
 const $ruleEngineOutput = document.getElementById('ruleEngineOutput');
@@ -389,6 +392,88 @@ async function applyProfileChanges() {
 }
 
 // ---------------------------------------------------------------------------
+// Keyword Notion API helpers
+// ---------------------------------------------------------------------------
+
+/**
+ * Step 1 — Fetch keywords from Notion keyword DB and populate the UI inputs.
+ */
+async function loadKeywordsFromNotion() {
+    $btnLoadKeywords.disabled = true;
+    $btnLoadKeywords.querySelector('.btn-icon').textContent = '⏳';
+    try {
+        const res = await fetch('/api/keywords');
+        if (!res.ok) throw new Error(`Server returned ${res.status}`);
+        const data = await res.json();
+
+        // data = { keywords: [...], keyword_map: { exploratory: [...], ... } }
+        if (data.keyword_map) {
+            populateEpistemicUI(null, data.keyword_map);
+            addMessage('agent', `📥 已從 Notion 載入 ${data.keywords?.length ?? 0} 個關鍵字。`);
+        } else {
+            addMessage('agent', '⚠️ Notion 關鍵字資料庫為空。');
+        }
+    } catch (err) {
+        addMessage('agent', `⚠️ 載入關鍵字失敗：${err.message}`);
+        console.error(err);
+    } finally {
+        $btnLoadKeywords.disabled = false;
+        $btnLoadKeywords.querySelector('.btn-icon').textContent = '📥';
+    }
+}
+
+/**
+ * Step 2 — Collect edited keywords from UI and apply them through the backend
+ *          (NotionKeywordSync → EpistemicRuleEngine).
+ */
+async function applyKeywordsToBackend() {
+    $btnApplyKeywords.disabled = true;
+    $btnApplyKeywords.querySelector('.btn-icon').textContent = '⏳';
+    try {
+        const keywordMap = collectKeywordMap();
+
+        // Build a flat keyword list the backend expects
+        const keywords = [];
+        for (const [role, terms] of Object.entries(keywordMap)) {
+            for (const term of terms) {
+                keywords.push({ term, role, weight: 1.0 });
+            }
+        }
+
+        const res = await fetch('/api/apply-keywords', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ keywords }),
+        });
+        if (!res.ok) throw new Error(`Server returned ${res.status}`);
+        const data = await res.json();
+
+        // Update rule engine display if returned
+        if (data.state?.rule_engine_output) {
+            displayRuleEngineOutput(data.state.rule_engine_output);
+        }
+        if (data.state?.epistemic_profile) {
+            populateEpistemicUI(data.state.epistemic_profile, null);
+        }
+
+        state.keywordMap = keywordMap;
+        addMessage('agent', '🔄 關鍵字已套用，Rule Engine 已重新運算。');
+
+        // Brief highlight on structure panel
+        const panel = document.querySelector('.structure-panel');
+        panel.style.borderLeft = '2px solid rgba(139, 92, 246, 0.5)';
+        setTimeout(() => { panel.style.borderLeft = 'none'; }, 1500);
+
+    } catch (err) {
+        addMessage('agent', `⚠️ 套用關鍵字失敗：${err.message}`);
+        console.error(err);
+    } finally {
+        $btnApplyKeywords.disabled = false;
+        $btnApplyKeywords.querySelector('.btn-icon').textContent = '🔄';
+    }
+}
+
+// ---------------------------------------------------------------------------
 // Notion actions
 // ---------------------------------------------------------------------------
 
@@ -566,6 +651,10 @@ for (const o of ORIENTATIONS) {
 // Apply profile button
 $btnApplyProfile.addEventListener('click', applyProfileChanges);
 
+// Keyword Notion buttons
+$btnLoadKeywords.addEventListener('click', loadKeywordsFromNotion);
+$btnApplyKeywords.addEventListener('click', applyKeywordsToBackend);
+
 // Modal
 $syncCancel.addEventListener('click', () => {
     $syncModal.style.display = 'none';
@@ -590,3 +679,6 @@ $syncModal.addEventListener('click', (e) => {
 // ---------------------------------------------------------------------------
 
 startSession();
+
+// Auto-load keywords from Notion on page load
+loadKeywordsFromNotion();

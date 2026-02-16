@@ -1,10 +1,10 @@
 {
     "skill_name": "EpistemicRuleEngine",
-    "description": "Deterministic rule engine that takes an epistemic profile and keyword map to produce dominant orientation, RQ templates, method bias, and logic pattern.",
+    "description": "Rule engine that uses epistemic_profile, keyword_map, and keyword_roles to dynamically determine dominant orientation, generate RQ templates, method bias, contribution bias, and logic pattern — without static lookup tables.",
     "input": {
         "epistemic_profile": {
             "type": "object",
-            "description": "Soft distribution of epistemic orientation scores.",
+            "description": "Normalised orientation scores (each 0–1, sum = 1).",
             "properties": {
                 "exploratory": {
                     "type": "number"
@@ -28,7 +28,7 @@
         },
         "keyword_map": {
             "type": "object",
-            "description": "Keywords mapped to each epistemic orientation.",
+            "description": "Keywords grouped by epistemic orientation.",
             "properties": {
                 "exploratory": {
                     "type": "array",
@@ -61,6 +61,13 @@
                 "problem_solving",
                 "constructive"
             ]
+        },
+        "keyword_roles": {
+            "type": "object",
+            "description": "Maps each keyword term to its epistemic role.",
+            "additionalProperties": {
+                "type": "string"
+            }
         }
     },
     "output": {
@@ -73,24 +80,31 @@
             "items": {
                 "type": "string"
             },
-            "description": "Research question templates matched to the dominant orientation."
+            "description": "2–3 dynamically generated research question templates grounded in the actual keywords."
         },
         "method_bias": {
             "type": "array",
             "items": {
                 "type": "string"
             },
-            "description": "Suggested methodological leanings based on the orientation."
+            "description": "1–2 methodological leanings inferred from keyword semantics and orientation."
+        },
+        "contribution_bias": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            },
+            "description": "1–2 expected contribution types inferred from orientation and keywords."
         },
         "logic_pattern": {
             "type": "string",
-            "description": "Expected logical structure pattern for the framing."
+            "description": "Expected reasoning chain inferred from the dominant orientation and keyword semantics."
         }
     },
     "prompt_file": "prompt.md",
     "output_format": "json",
     "model_requirements": {
-        "temperature": 0.2,
-        "max_tokens": 600
+        "temperature": 0.3,
+        "max_tokens": 800
     }
 }

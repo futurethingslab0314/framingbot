@@ -1,0 +1,114 @@
+[
+    {
+        "input": {
+            "title": "Exploring the Role of AI-Generated Feedback in Studio-Based Design Education",
+            "abstract": "This study investigates how AI-generated feedback influences the iterative design process in a university-level product design studio. Using a qualitative, exploratory approach, we observed 24 students over a 10-week course, collecting reflection journals and semi-structured interviews. Findings reveal that AI feedback accelerated ideation but sometimes narrowed students' creative scope, raising questions about the balance between efficiency and open-ended exploration in design education.",
+            "tags": [
+                "design education",
+                "AI feedback",
+                "studio pedagogy"
+            ]
+        },
+        "expected_output": {
+            "orientation_scores": {
+                "exploratory": 0.55,
+                "critical": 0.20,
+                "problem_solving": 0.10,
+                "constructive": 0.15
+            },
+            "suggested_keywords": [
+                {
+                    "text": "AI-mediated feedback",
+                    "orientation": "exploratory",
+                    "role": "rq_trigger",
+                    "weight": 0.9,
+                    "notes": "Central phenomenon under investigation; likely to shape the research question."
+                },
+                {
+                    "text": "iterative design process",
+                    "orientation": "constructive",
+                    "role": "method_bias",
+                    "weight": 0.8,
+                    "notes": "Describes the design activity observed; could guide methodology framing."
+                },
+                {
+                    "text": "creative narrowing",
+                    "orientation": "critical",
+                    "role": "tone_modifier",
+                    "weight": 0.7,
+                    "notes": "A tension identified in the findings; adds a critical lens."
+                },
+                {
+                    "text": "studio pedagogy",
+                    "orientation": "exploratory",
+                    "role": "contribution_frame",
+                    "weight": 0.6,
+                    "notes": "Frames the contribution within design education literature."
+                },
+                {
+                    "text": "design reflection",
+                    "orientation": "exploratory",
+                    "role": "rq_trigger",
+                    "weight": 0.65,
+                    "notes": "Reflection journals are a key data source, tying to reflective practice."
+                }
+            ]
+        }
+    },
+    {
+        "input": {
+            "title": "Optimizing Urban Bus Route Networks Using Multi-Objective Genetic Algorithms",
+            "abstract": "This paper presents a multi-objective optimization framework for redesigning urban bus routes to minimize passenger travel time and operational cost. A genetic algorithm is applied to real-world transit data from a mid-sized city, demonstrating a 12% reduction in average commute time. The results suggest practical guidelines for transit planners seeking cost-effective network improvements.",
+            "tags": [
+                "optimization",
+                "public transit",
+                "genetic algorithm"
+            ]
+        },
+        "expected_output": {
+            "orientation_scores": {
+                "exploratory": 0.05,
+                "critical": 0.05,
+                "problem_solving": 0.75,
+                "constructive": 0.15
+            },
+            "suggested_keywords": [
+                {
+                    "text": "transit network design",
+                    "orientation": "constructive",
+                    "role": "rq_trigger",
+                    "weight": 0.85,
+                    "notes": "Reframing keyword: positions the optimization as a design problem."
+                },
+                {
+                    "text": "commuter experience",
+                    "orientation": "exploratory",
+                    "role": "tone_modifier",
+                    "weight": 0.5,
+                    "notes": "Shifts framing from algorithmic output toward user-centered understanding."
+                },
+                {
+                    "text": "multi-objective trade-off",
+                    "orientation": "problem_solving",
+                    "role": "method_bias",
+                    "weight": 0.8,
+                    "notes": "Core methodological concept driving the analysis."
+                },
+                {
+                    "text": "design guideline",
+                    "orientation": "constructive",
+                    "role": "contribution_frame",
+                    "weight": 0.7,
+                    "notes": "Practical guidelines map well to a constructive contribution framing."
+                },
+                {
+                    "text": "efficiency–equity tension",
+                    "orientation": "critical",
+                    "role": "tone_modifier",
+                    "weight": 0.4,
+                    "notes": "Introduces a critical angle — whose travel time is being optimized?"
+                }
+            ]
+        }
+    }
+]

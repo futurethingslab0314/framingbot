@@ -535,6 +535,11 @@ body {
     background: rgba(96, 165, 250, 0.15);
 }
 
+.btn-sm {
+    padding: 0.3rem 0.6rem;
+    font-size: 0.78rem;
+}
+
 .btn-accent {
     background: rgba(52, 211, 153, 0.08);
     border-color: rgba(52, 211, 153, 0.2);

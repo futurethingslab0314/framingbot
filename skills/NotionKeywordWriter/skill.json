@@ -1,0 +1,122 @@
+{
+    "skill_name": "NotionKeywordWriter",
+    "description": "Take suggested keywords (from PaperEpistemicProfiler) and prepare a clean payload for writing into the Notion Keyword Database.",
+    "input": {
+        "suggested_keywords": {
+            "type": "array",
+            "description": "Array of keyword objects from PaperEpistemicProfiler output.",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "text": {
+                        "type": "string"
+                    },
+                    "orientation": {
+                        "type": "string",
+                        "enum": [
+                            "exploratory",
+                            "critical",
+                            "problem_solving",
+                            "constructive"
+                        ]
+                    },
+                    "role": {
+                        "type": "string",
+                        "enum": [
+                            "rq_trigger",
+                            "method_bias",
+                            "contribution_frame",
+                            "tone_modifier"
+                        ]
+                    },
+                    "weight": {
+                        "type": "number"
+                    },
+                    "notes": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "source_paper": {
+            "type": "object",
+            "description": "Reference to the paper these keywords were extracted from.",
+            "properties": {
+                "title": {
+                    "type": "string"
+                },
+                "zotero_item_key": {
+                    "type": "string",
+                    "required": false
+                },
+                "year": {
+                    "type": "number",
+                    "required": false
+                }
+            }
+        },
+        "default_active": {
+            "type": "boolean",
+            "description": "Whether new keywords should be marked active. Defaults to false.",
+            "default": false
+        },
+        "default_version_tag": {
+            "type": "string",
+            "description": "Optional version tag to attach to all rows.",
+            "required": false
+        }
+    },
+    "output": {
+        "notion_keyword_rows": {
+            "type": "array",
+            "description": "Clean, deduplicated rows ready for Notion keyword database insertion.",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "keyword": {
+                        "type": "string"
+                    },
+                    "orientation": {
+                        "type": "string",
+                        "enum": [
+                            "exploratory",
+                            "critical",
+                            "problem_solving",
+                            "constructive"
+                        ]
+                    },
+                    "role": {
+                        "type": "string",
+                        "enum": [
+                            "rq_trigger",
+                            "method_bias",
+                            "contribution_frame",
+                            "tone_modifier"
+                        ]
+                    },
+                    "weight": {
+                        "type": "number"
+                    },
+                    "notes": {
+                        "type": "string"
+                    },
+                    "active": {
+                        "type": "boolean"
+                    },
+                    "updatedby": {
+                        "type": "string"
+                    },
+                    "version_tag": {
+                        "type": "string"
+                    }
+                }
+            }
+        }
+    },
+    "prompt_file": "prompt.md",
+    "output_format": "json",
+    "model_requirements": {
+        "temperature": 0,
+        "max_tokens": 2000
+    }
+}

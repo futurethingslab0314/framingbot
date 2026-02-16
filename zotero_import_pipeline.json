@@ -1,0 +1,77 @@
+{
+    "pipeline_name": "ZoteroImportPipeline",
+    "description": "Analyze a Zotero paper (title, abstract, tags) and produce keyword suggestions ready for the Notion Keyword Database. This pipeline does NOT modify the main agent keyword_map — it only returns a payload.",
+    "inputs": {
+        "title": {
+            "type": "string",
+            "required": true,
+            "description": "Paper title."
+        },
+        "abstract": {
+            "type": "string",
+            "required": true,
+            "description": "Paper abstract."
+        },
+        "tags": {
+            "type": "array",
+            "required": false,
+            "items": {
+                "type": "string"
+            },
+            "description": "Optional author/Zotero tags."
+        },
+        "updatedby": {
+            "type": "string",
+            "required": true,
+            "description": "Who triggered this import (e.g. user ID or 'zotero-sync')."
+        },
+        "version_tag": {
+            "type": "string",
+            "required": false,
+            "description": "Optional version tag for all rows."
+        }
+    },
+    "steps": [
+        {
+            "step": 1,
+            "skill": "PaperEpistemicProfiler",
+            "description": "Analyze the paper's epistemic stance and extract candidate keywords.",
+            "input_mapping": {
+                "title": "input.title",
+                "abstract": "input.abstract",
+                "tags": "input.tags"
+            },
+            "output_mapping": {
+                "state.orientation_scores": "output.orientation_scores",
+                "state.suggested_keywords": "output.suggested_keywords"
+            }
+        },
+        {
+            "step": 2,
+            "skill": "NotionKeywordWriter",
+            "description": "Normalize, deduplicate, and format keywords for Notion insertion. Active defaults to false.",
+            "input_mapping": {
+                "suggested_keywords": "state.suggested_keywords",
+                "source_paper": {
+                    "title": "input.title",
+                    "zotero_item_key": "input.zotero_item_key",
+                    "year": "input.year"
+                },
+                "default_active": false,
+                "default_version_tag": "input.version_tag"
+            },
+            "output_mapping": {
+                "state.notion_keyword_rows": "output.notion_keyword_rows"
+            }
+        }
+    ],
+    "final_output": {
+        "orientation_scores": "state.orientation_scores",
+        "notion_keyword_rows": "state.notion_keyword_rows"
+    },
+    "constraints": [
+        "This pipeline MUST NOT modify the main agent keyword_map directly.",
+        "All returned keyword rows have active = false by default.",
+        "Output is a suggestion payload only — the application layer decides whether to write into Notion."
+    ]
+}

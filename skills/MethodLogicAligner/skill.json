@@ -1,0 +1,88 @@
+{
+    "skill_name": "MethodLogicAligner",
+    "description": "Infers methodology and validates its alignment with the research question, logic pattern, and keyword semantics. Enhanced replacement for MethodInferrer that also uses keyword_map and contribution_bias.",
+    "input": {
+        "selected_rq": {
+            "type": "string",
+            "description": "The chosen research question."
+        },
+        "method_bias": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            },
+            "description": "Methodological leanings from EpistemicRuleEngine (1–2 items)."
+        },
+        "contribution_bias": {
+            "type": "array",
+            "items": {
+                "type": "string"
+            },
+            "description": "Expected contribution types from EpistemicRuleEngine (1–2 items)."
+        },
+        "dominant_orientation": {
+            "type": "string",
+            "enum": [
+                "problem_solving",
+                "exploratory",
+                "constructive",
+                "critical"
+            ],
+            "description": "The dominant epistemic orientation."
+        },
+        "logic_pattern": {
+            "type": "string",
+            "description": "The reasoning structure pattern from EpistemicRuleEngine."
+        },
+        "keyword_map": {
+            "type": "object",
+            "description": "Keywords grouped by epistemic orientation.",
+            "properties": {
+                "exploratory": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "critical": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "problem_solving": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "constructive": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            }
+        },
+        "tension": {
+            "type": "object",
+            "description": "The core tension identified by TensionExtractor."
+        }
+    },
+    "output": {
+        "method": {
+            "type": "string",
+            "description": "A 2–3 sentence description of the inferred methodological approach."
+        },
+        "alignment_rationale": {
+            "type": "string",
+            "description": "One sentence explaining why this method fits the RQ, orientation, and keywords."
+        }
+    },
+    "prompt_file": "prompt.md",
+    "output_format": "json",
+    "model_requirements": {
+        "temperature": 0.3,
+        "max_tokens": 400
+    }
+}

@@ -1,0 +1,83 @@
+[
+    {
+        "input": {
+            "suggested_keywords": [
+                {
+                    "text": "AI-mediated feedback",
+                    "orientation": "exploratory",
+                    "role": "rq_trigger",
+                    "weight": 0.9,
+                    "notes": "Central phenomenon under investigation."
+                },
+                {
+                    "text": "  ai-mediated feedback ",
+                    "orientation": "exploratory",
+                    "role": "rq_trigger",
+                    "weight": 0.85,
+                    "notes": "Duplicate that should be removed."
+                },
+                {
+                    "text": "creative narrowing",
+                    "orientation": "critical",
+                    "role": "tone_modifier",
+                    "weight": 0.7,
+                    "notes": "A tension identified in findings."
+                },
+                {
+                    "text": "",
+                    "orientation": "exploratory",
+                    "role": "rq_trigger",
+                    "weight": 0.5,
+                    "notes": "Empty keyword, should be skipped."
+                },
+                {
+                    "text": "design reflection",
+                    "orientation": "exploratory",
+                    "role": "rq_trigger",
+                    "weight": 0.65,
+                    "notes": "Tied to reflective practice."
+                }
+            ],
+            "source_paper": {
+                "title": "Exploring the Role of AI-Generated Feedback in Studio-Based Design Education",
+                "year": 2024
+            },
+            "default_active": false,
+            "default_version_tag": "v1.0"
+        },
+        "expected_output": {
+            "notion_keyword_rows": [
+                {
+                    "keyword": "AI-mediated feedback",
+                    "orientation": "exploratory",
+                    "role": "rq_trigger",
+                    "weight": 0.9,
+                    "notes": "Central phenomenon under investigation. (Source: Exploring the Role of AI-Generated Feedback in Studio-Based Design Education, 2024)",
+                    "active": false,
+                    "updatedby": "PaperEpistemicProfiler",
+                    "version_tag": "v1.0"
+                },
+                {
+                    "keyword": "creative narrowing",
+                    "orientation": "critical",
+                    "role": "tone_modifier",
+                    "weight": 0.7,
+                    "notes": "A tension identified in findings. (Source: Exploring the Role of AI-Generated Feedback in Studio-Based Design Education, 2024)",
+                    "active": false,
+                    "updatedby": "PaperEpistemicProfiler",
+                    "version_tag": "v1.0"
+                },
+                {
+                    "keyword": "design reflection",
+                    "orientation": "exploratory",
+                    "role": "rq_trigger",
+                    "weight": 0.65,
+                    "notes": "Tied to reflective practice. (Source: Exploring the Role of AI-Generated Feedback in Studio-Based Design Education, 2024)",
+                    "active": false,
+                    "updatedby": "PaperEpistemicProfiler",
+                    "version_tag": "v1.0"
+                }
+            ]
+        }
+    }
+]

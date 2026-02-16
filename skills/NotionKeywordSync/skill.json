@@ -1,0 +1,122 @@
+{
+    "skill_name": "NotionKeywordSync",
+    "description": "Receives structured keyword data, groups keywords by epistemic orientation, stores them as keyword_map, and calculates epistemic_profile based on keyword weights.",
+    "input": {
+        "keywords": {
+            "type": "array",
+            "description": "Flat list of keyword objects, each with a term and its epistemic role.",
+            "items": {
+                "type": "object",
+                "properties": {
+                    "term": {
+                        "type": "string",
+                        "description": "The keyword string."
+                    },
+                    "role": {
+                        "type": "string",
+                        "enum": [
+                            "exploratory",
+                            "critical",
+                            "problem_solving",
+                            "constructive"
+                        ],
+                        "description": "The epistemic orientation this keyword belongs to."
+                    },
+                    "weight": {
+                        "type": "number",
+                        "minimum": 0,
+                        "maximum": 1,
+                        "description": "Optional importance weight for this keyword (default 1.0)."
+                    }
+                },
+                "required": [
+                    "term",
+                    "role"
+                ]
+            }
+        }
+    },
+    "output": {
+        "keyword_map": {
+            "type": "object",
+            "description": "Keywords grouped by epistemic orientation.",
+            "properties": {
+                "exploratory": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "critical": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "problem_solving": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "constructive": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                }
+            },
+            "required": [
+                "exploratory",
+                "critical",
+                "problem_solving",
+                "constructive"
+            ]
+        },
+        "keyword_roles": {
+            "type": "object",
+            "description": "Maps each keyword term to its epistemic role.",
+            "additionalProperties": {
+                "type": "string"
+            }
+        },
+        "epistemic_profile": {
+            "type": "object",
+            "description": "Calculated orientation scores normalised to 0–1.",
+            "properties": {
+                "exploratory": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                },
+                "critical": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                },
+                "problem_solving": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                },
+                "constructive": {
+                    "type": "number",
+                    "minimum": 0,
+                    "maximum": 1
+                }
+            },
+            "required": [
+                "exploratory",
+                "critical",
+                "problem_solving",
+                "constructive"
+            ]
+        }
+    },
+    "prompt_file": "prompt.md",
+    "output_format": "json",
+    "model_requirements": {
+        "temperature": 0.0,
+        "max_tokens": 800
+    }
+}

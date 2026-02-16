@@ -197,6 +197,14 @@
                 "constructive"
             ]
         },
+        "keyword_roles": {
+            "type": "object",
+            "description": "Maps each keyword to its epistemic role (e.g. 'explore' → 'exploratory').",
+            "additionalProperties": {
+                "type": "string",
+                "description": "The epistemic role this keyword signals."
+            }
+        },
         "rule_engine_output": {
             "type": "object",
             "description": "Deterministic outputs derived from the epistemic profile by the rule engine.",
@@ -227,6 +235,33 @@
                 "method_bias",
                 "logic_pattern"
             ]
+        },
+        "zotero_analysis_output": {
+            "type": "object",
+            "description": "Structured output from Zotero literature analysis.",
+            "properties": {
+                "papers": {
+                    "type": "array",
+                    "items": {
+                        "type": "object"
+                    },
+                    "description": "Analysed papers from the Zotero collection."
+                },
+                "themes": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "description": "Key themes extracted from the literature."
+                },
+                "gaps": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    },
+                    "description": "Research gaps identified from the literature review."
+                }
+            }
         }
     },
     "required": [
@@ -241,6 +276,8 @@
         "coherence_notes",
         "epistemic_profile",
         "keyword_map",
-        "rule_engine_output"
+        "keyword_roles",
+        "rule_engine_output",
+        "zotero_analysis_output"
     ]
 }
